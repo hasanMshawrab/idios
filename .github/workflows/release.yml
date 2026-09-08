@@ -1,0 +1,88 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # git describe needs the tag history to find the previous release.
+          fetch-depth: 0
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # The tag is a claim about a build; these are the two places that
+      # answer "what version am I" at runtime, so they have to agree with
+      # it or the claim is a lie.
+      - name: versions agree with the tag
+        run: |
+          tag=${GITHUB_REF_NAME#v}
+          go_version=$(sed -n 's/^const version = "\(.*\)"$/\1/p' cmd/idios/main.go)
+          app_version=$(sed -n 's/.*MARKETING_VERSION = \(.*\);/\1/p' \
+            macos/idios.xcodeproj/project.pbxproj | sort -u)
+          echo "tag=$tag go=$go_version app=$app_version"
+          if [ "$(printf '%s\n' "$app_version" | wc -l)" -ne 1 ]; then
+            echo "MARKETING_VERSION differs between build configurations" >&2
+            exit 1
+          fi
+          if [ "$go_version" != "$tag" ] || [ "$app_version" != "$tag" ]; then
+            echo "version mismatch: tag $tag, go $go_version, app $app_version" >&2
+            exit 1
+          fi
+
+      - run: go build ./...
+      - run: go vet ./...
+      - run: go test ./...
+      - run: make ascii
+
+      # There are no down migrations and Migrate refuses a database newer
+      # than the build, so a release carrying one makes the upgrade one-way.
+      - name: release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X POST /repos/$GITHUB_REPOSITORY/releases/generate-notes \
+            -f tag_name="$GITHUB_REF_NAME" --jq .body > notes.md
+          previous=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME^" 2>/dev/null || true)
+          if [ -n "$previous" ]; then
+            added=$(git diff --name-only --diff-filter=A \
+              "$previous" "$GITHUB_REF_NAME" -- internal/store/migrations \
+              | xargs -r -n1 basename | paste -sd ', ' -)
+          fi
+          if [ -n "${added:-}" ]; then
+            {
+              echo "## This release migrates your database"
+              echo
+              echo "New migrations: $added. They are applied on first run."
+              echo "The upgrade is one way: an earlier idios will refuse a"
+              echo "database this version has migrated."
+              echo
+              cat notes.md
+            } > notes.new && mv notes.new notes.md
+          fi
+
+      - name: create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Every 0.x release is a pre-release: 1.0 is when the schema
+          # stabilizes and migrations replace recreation.
+          case "$GITHUB_REF_NAME" in
+            v0.*) prerelease=--prerelease ;;
+            *)    prerelease= ;;
+          esac
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file notes.md \
+            --verify-tag \
+            $prerelease

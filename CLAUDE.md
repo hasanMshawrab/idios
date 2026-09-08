@@ -35,9 +35,11 @@ Plans live in `docs/plans/`, one directory per milestone; start with
   `source_component`, and whether the pod is terminating
   (`deletion_requested_at`), never on `phase`, `exit_code` or `message`; a
   test enforces it.
-- Until the first stable release every schema change edits `0001_init.sql`
-  in place and the databases are recreated; the migration mechanism waits
-  for a stable schema.
+- Every schema change is a new `NNNN_description.sql` under
+  `internal/store/migrations`; `0001_init.sql` is never edited again.
+  `Store.Migrate` applies each file the database has not seen in its own
+  transaction. There are no down migrations, so a migrated database is one
+  an earlier build refuses to open.
 - A list/watch failure of any kind is a cluster error and clears `ready`
   until the identity probe succeeds. The grace window and the stuck
   threshold are comparisons in `internal/incident` against an injected
@@ -83,9 +85,8 @@ Plans live in `docs/plans/`, one directory per milestone; start with
   make ascii` (plus `make generate-check` when `api/proto` changed, plus
   `make app-test && make app` when `macos/` changed). `make generate-check`
   only passes on a committed tree, so run it after the commit when a task's
-  checkpoint calls for both. A schema change means `rm -rf .storage
-  .storage/smoke` and recreating any other data directory before the next
-  run.
+  checkpoint calls for both. A schema change needs no data directory
+  reset: the next run migrates `.storage` and `.storage/smoke` in place.
 - Swift follows the Go rules: ASCII, comments say why, one-line doc comment
   per type, tests trace to a spec statement with whole-value assertions.
   Model types are built only through `init(wire:)`; identity fields and

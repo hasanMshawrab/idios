@@ -18,7 +18,7 @@ import (
 	"github.com/hasanMshawrab/idios/internal/store"
 )
 
-const version = "0.0.1-dev"
+const version = "0.10.0"
 
 const usage = `usage: idios [-config file] [-data-dir dir] [-kubeconfig file] [-listen addr] <command>
 

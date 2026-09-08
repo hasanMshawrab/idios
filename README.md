@@ -219,5 +219,6 @@ in this README come from it: `hack/macos/screenshot.sh <route> <png>`
 
 ## Status
 
-Pre-release. The schema still changes in place and databases are
-recreated on change; the app is unsigned; expect rough edges.
+Pre-release. A release that changes the schema migrates your database on
+first run, and an earlier build will then refuse to open it; the app is
+unsigned; expect rough edges.
