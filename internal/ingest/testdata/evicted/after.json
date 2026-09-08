@@ -1,0 +1,6 @@
+{"metadata":{"name":"web-7d9f8c6b5-evic1","namespace":"idios-smoke","uid":"pod-evict","creationTimestamp":"2026-08-27T11:45:00Z","ownerReferences":[{"apiVersion":"apps/v1","kind":"ReplicaSet","name":"web-7d9f8c6b5","uid":"rs-web-1","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Always","containers":[{"name":"api","image":"registry.example.com/web:1.4.2"}]},
+ "status":{"phase":"Failed","reason":"Evicted","message":"The node was low on resource: memory. Threshold quantity: 100Mi, available: 52Mi. Container api was using 900Mi, request is 0, has larger consumption of memory.","qosClass":"BestEffort","startTime":"2026-08-27T11:45:05Z",
+  "conditions":[{"type":"Ready","status":"False","reason":"PodFailed","lastTransitionTime":"2026-08-27T11:45:10Z"}],
+  "containerStatuses":[{"name":"api","image":"registry.example.com/web:1.4.2","imageID":"registry.example.com/web@sha256:1111","containerID":"containerd://eee","ready":false,"restartCount":0,
+   "state":{"terminated":{"exitCode":137,"signal":9,"reason":"Error","startedAt":"2026-08-27T11:45:08Z","finishedAt":"2026-08-27T11:57:30Z","containerID":"containerd://eee"}}}]}}

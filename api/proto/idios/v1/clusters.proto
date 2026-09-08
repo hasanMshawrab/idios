@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+package idios.v1;
+
+import "sebuf/http/annotations.proto";
+
+option go_package = "github.com/hasanMshawrab/idios/internal/apigen/idiosv1;idiosv1";
+
+// Cluster is a clusters row with its watched namespaces and the state only
+// the running process knows.
+message Cluster {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["1", "2"]}];
+  optional string identity = 2 [(sebuf.http.field_examples) = {values: ["6f1c8e2a-4b3d-4c5e-9f80-1a2b3c4d5e6f"]}];
+  string name = 3 [(sebuf.http.field_examples) = {values: ["prod", "staging"]}];
+  string context_name = 4 [(sebuf.http.field_examples) = {values: ["orbstack", "prod-eu"]}];
+  string api_server_url = 5 [(sebuf.http.field_examples) = {values: ["https://127.0.0.1:26443"]}];
+  string first_seen_at = 6 [(sebuf.http.field_examples) = {values: ["2026-08-27T13:58:02.110394Z"]}];
+  optional string last_connected_at = 7 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:09:41.115204Z"]}];
+  optional string last_error = 8 [(sebuf.http.field_examples) = {values: ["dial tcp 127.0.0.1:26443: connect: connection refused"]}];
+  optional string last_error_at = 9 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:10:12.004881Z"]}];
+  repeated string namespaces = 10 [(sebuf.http.field_examples) = {values: ["shop", "payments"]}];
+  bool ready = 11 [(sebuf.http.field_examples) = {values: ["true", "false"]}];
+  optional string last_event_at = 12 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:09:41.115204Z"]}];
+  double skew_seconds = 13 [(sebuf.http.field_examples) = {values: ["0.184", "-1.2"]}];
+  string grafana_url = 14 [(sebuf.http.field_examples) = {values: ["https://logs.example.grafana.net"]}];
+  string loki_datasource_uid = 15 [(sebuf.http.field_examples) = {values: ["grafanacloud-logs"]}];
+  string log_selector = 16 [(sebuf.http.field_examples) = {values: ["{namespace=\"$namespace\", pod=\"$pod\", container=\"$container\"}"]}];
+}
+
+// ClustersResponse is the cluster list.
+message ClustersResponse {
+  repeated Cluster clusters = 1;
+  bool truncated = 2 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+}
+
+// ListClustersRequest scopes the cluster list.
+message ListClustersRequest {
+  repeated int64 cluster_ids = 1 [(sebuf.http.query) = {}];
+}
+
+// StreamClustersRequest scopes the cluster stream.
+message StreamClustersRequest {
+  repeated int64 cluster_ids = 1 [(sebuf.http.query) = {}];
+}
+
+// KubeContext is one context of the kubeconfig the daemon reads. It carries
+// no credentials.
+message KubeContext {
+  string name = 1 [(sebuf.http.field_examples) = {values: ["orbstack", "prod-eu"]}];
+  string cluster = 2 [(sebuf.http.field_examples) = {values: ["orbstack"]}];
+  string server = 3 [(sebuf.http.field_examples) = {values: ["https://127.0.0.1:26443"]}];
+}
+
+// ListKubeContextsRequest takes no parameters; the kubeconfig is the
+// daemon's.
+message ListKubeContextsRequest {}
+
+// KubeContextsResponse is the kubeconfig's contexts.
+message KubeContextsResponse {
+  repeated KubeContext contexts = 1;
+  bool truncated = 2 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+}
+
+// ListKubeNamespacesRequest names the context to ask.
+message ListKubeNamespacesRequest {
+  string context = 1;
+}
+
+// KubeNamespacesResponse is what one cluster answered.
+message KubeNamespacesResponse {
+  repeated string names = 1 [(sebuf.http.field_examples) = {values: ["shop", "payments", "default"]}];
+  // True when the Role cannot list namespaces, so names is empty without
+  // that meaning the cluster has none.
+  bool forbidden = 2 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+}
+
+// AddClusterRequest names a kubeconfig context and the friendly name the
+// application shows for it.
+message AddClusterRequest {
+  string context_name = 1 [(sebuf.http.field_examples) = {values: ["orbstack", "prod-eu"]}];
+  string name = 2 [(sebuf.http.field_examples) = {values: ["prod", "staging"]}];
+}
+
+// RenameClusterRequest addresses a cluster and its new friendly name.
+message RenameClusterRequest {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["1", "2"]}];
+  string name = 2 [(sebuf.http.field_examples) = {values: ["prod", "staging"]}];
+}
+
+// DeleteClusterRequest addresses the cluster to remove.
+message DeleteClusterRequest {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["1", "2"]}];
+}
+
+// DeleteClusterResponse is empty: the row is gone, there is nothing to
+// return.
+message DeleteClusterResponse {}
+
+// SetClusterGrafanaRequest addresses a cluster and its Grafana log-link
+// configuration; an empty grafana_url clears all three fields.
+message SetClusterGrafanaRequest {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["1", "2"]}];
+  string grafana_url = 2 [(sebuf.http.field_examples) = {values: ["https://logs.example.grafana.net"]}];
+  string loki_datasource_uid = 3 [(sebuf.http.field_examples) = {values: ["grafanacloud-logs"]}];
+  string log_selector = 4 [(sebuf.http.field_examples) = {values: ["{namespace=\"$namespace\", pod=\"$pod\", container=\"$container\"}"]}];
+}
+
+// AddWatchedNamespaceRequest addresses a cluster and the namespace to start
+// watching.
+message AddWatchedNamespaceRequest {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["1", "2"]}];
+  string name = 2 [(sebuf.http.field_examples) = {values: ["shop", "payments"]}];
+}
+
+// RemoveWatchedNamespaceRequest addresses a cluster and the namespace to
+// stop watching.
+message RemoveWatchedNamespaceRequest {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["1", "2"]}];
+  string name = 2 [(sebuf.http.field_examples) = {values: ["shop", "payments"]}];
+}

@@ -1,0 +1,5 @@
+{"metadata":{"name":"web-2b3c4-pend1","namespace":"idios-smoke","uid":"pod-unsched","creationTimestamp":"2026-08-27T11:45:00Z","ownerReferences":[{"apiVersion":"apps/v1","kind":"ReplicaSet","name":"web-2b3c4","uid":"rs-web-7","controller":true}]},
+ "spec":{"nodeName":"node-b","restartPolicy":"Always","containers":[{"name":"api","image":"registry.example.com/web:1.4.2","resources":{"requests":{"cpu":"8"}}}]},
+ "status":{"phase":"Running","qosClass":"Burstable","startTime":"2026-08-27T11:58:00Z",
+  "conditions":[{"type":"PodScheduled","status":"True","lastTransitionTime":"2026-08-27T11:58:00Z"}],
+  "containerStatuses":[{"name":"api","image":"registry.example.com/web:1.4.2","imageID":"registry.example.com/web@sha256:1111","containerID":"containerd://uuu","ready":true,"restartCount":0,"state":{"running":{"startedAt":"2026-08-27T11:58:05Z"}}}]}}

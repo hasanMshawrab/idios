@@ -1,0 +1,1 @@
+{"byCategory":[{"category":"crash","count":3},{"category":"oom","count":2},{"category":"unclean_exit","count":1}],"byState":[{"count":4,"state":"open"},{"count":1,"state":"acknowledged"},{"count":2,"state":"pod_deleted"},{"count":5,"state":"attention"}]}

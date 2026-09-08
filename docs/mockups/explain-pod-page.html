@@ -1,0 +1,541 @@
+<title>Pod Page Blueprint</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --ground: #f4f5f7;
+    --panel: #ffffff;
+    --ink: #1c1f24;
+    --ink-soft: #5b6470;
+    --ink-faint: #8b95a1;
+    --hair: rgba(0, 0, 0, 0.12);
+    --accent: #0a6cff;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(10, 108, 255, 0.1);
+    --flow: #e08316;
+    --flow-ink: #ffffff;
+    --scrim: rgba(14, 22, 34, 0.35);
+    --card-shadow: 0 10px 26px rgba(16, 24, 40, 0.16), 0 1px 2px rgba(16, 24, 40, 0.1);
+    /* Skeleton chrome, taken from the app's own light appearance. */
+    --sk-window: #ffffff;
+    --sk-title: #f0f0f3;
+    --sk-side: #ececef;
+    --sk-rail: #f6f6f8;
+    --sk-bar: #d9dce1;
+    --sk-bar-soft: #e6e8ec;
+    --sk-line: rgba(0, 0, 0, 0.1);
+    --sk-sel: #2f6df4;
+    --sk-on-sel: rgba(255, 255, 255, 0.82);
+    --sk-card: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #16191e;
+      --panel: #1e2228;
+      --ink: #e8ecf1;
+      --ink-soft: #a8b2be;
+      --ink-faint: #78838f;
+      --hair: rgba(255, 255, 255, 0.14);
+      --accent: #4c9bff;
+      --accent-ink: #0d1220;
+      --accent-soft: rgba(76, 155, 255, 0.16);
+      --flow: #f0a350;
+      --flow-ink: #1a1206;
+      --scrim: rgba(4, 8, 14, 0.52);
+      --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #16191e;
+    --panel: #1e2228;
+    --ink: #e8ecf1;
+    --ink-soft: #a8b2be;
+    --ink-faint: #78838f;
+    --hair: rgba(255, 255, 255, 0.14);
+    --accent: #4c9bff;
+    --accent-ink: #0d1220;
+    --accent-soft: rgba(76, 155, 255, 0.16);
+    --flow: #f0a350;
+    --flow-ink: #1a1206;
+    --scrim: rgba(4, 8, 14, 0.52);
+    --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  body {
+    margin: 0;
+    padding: 0 clamp(12px, 2.2vw, 28px) 56px;
+    background: var(--ground);
+    color: var(--ink);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui,
+      sans-serif;
+  }
+  .wrap { max-width: 1560px; margin: 0 auto; }
+
+  header.bar {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px;
+    padding: 22px 2px 14px;
+  }
+  header.bar h1 { font-size: 19px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  header.bar p { margin: 0; color: var(--ink-soft); font-size: 13.5px; }
+
+  .toggles {
+    display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center;
+    padding: 0 2px 14px; border-bottom: 1px solid var(--hair);
+  }
+  .sw {
+    display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+    border: 1px solid var(--hair); border-radius: 7px; padding: 5px 11px;
+    background: var(--panel); font-size: 13px; color: var(--ink-soft);
+    user-select: none;
+  }
+  .sw:hover { color: var(--ink); }
+  .sw input { accent-color: var(--accent); margin: 0; }
+  .sw input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .hint { color: var(--ink-faint); font-size: 12.5px; margin-left: 4px; }
+
+  .stage {
+    display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px;
+    padding-top: 20px; align-items: start;
+  }
+  @media (min-width: 1180px) { .stage { grid-template-columns: minmax(0, 1fr) 330px; } }
+
+  /* The window: the screenshot at its own 3024 x 1742 aspect, or the skeleton. */
+  .window {
+    position: relative; width: 100%; aspect-ratio: 3024 / 1742;
+    border-radius: 10px; overflow: hidden; background: var(--sk-window);
+    box-shadow: var(--card-shadow);
+    container-type: inline-size;
+  }
+  .shot { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .skeleton { position: absolute; inset: 0; background: var(--sk-window); display: none; }
+  #skel:checked ~ .stage .shot { visibility: hidden; }
+  #skel:checked ~ .stage .skeleton { display: block; }
+
+  .scrim { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+  /* Coach marks */
+  .mark {
+    position: absolute; padding: 0; margin: 0; background: none; cursor: pointer;
+    border: 1.5px solid var(--accent); border-radius: 6px;
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    left: calc(var(--l) / 20 * 1%);
+    top: calc(var(--t) / 11.52 * 1%);
+    width: calc(var(--w) / 20 * 1%);
+    height: calc(var(--h) / 11.52 * 1%);
+  }
+  .mark .pill {
+    position: absolute; top: -0.85cqw; left: -0.85cqw;
+    min-width: 1.7cqw; height: 1.7cqw; padding: 0 0.28cqw; border-radius: 1cqw;
+    background: var(--accent); color: var(--accent-ink);
+    font-size: 0.92cqw; font-weight: 600; line-height: 1.7cqw; text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .mark .step {
+    position: absolute; top: -1.15cqw; right: -1.15cqw;
+    width: 2.3cqw; height: 2.3cqw; border-radius: 50%;
+    background: var(--flow); color: var(--flow-ink);
+    font-size: 1.25cqw; font-weight: 700; line-height: 2.3cqw; text-align: center;
+    box-shadow: 0 0 0 0.25cqw rgba(255, 255, 255, 0.55);
+  }
+  .mark:hover, .mark:focus-visible, .mark.pin { border-color: var(--accent); box-shadow: 0 0 0 5px var(--accent-soft); }
+  .mark:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* Anchored note */
+  .tip {
+    position: absolute; top: -6px; width: 270px; z-index: 6;
+    background: var(--panel); color: var(--ink);
+    border: 1px solid var(--hair); border-radius: 10px; box-shadow: var(--card-shadow);
+    padding: 11px 13px 12px; text-align: left; cursor: default;
+    opacity: 0; visibility: hidden; transition: opacity 90ms linear;
+  }
+  .tip.r { left: calc(100% + 14px); }
+  .tip.l { right: calc(100% + 14px); }
+  .mark:hover .tip, .mark:focus-visible .tip, .mark.pin .tip { opacity: 1; visibility: visible; }
+  .tip h4 { margin: 0 0 6px; font-size: 13.5px; font-weight: 600; }
+  .tip p { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--ink-soft); }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 7px; }
+  .tags code {
+    font: 500 11px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    background: var(--accent-soft); color: var(--accent);
+    border-radius: 4px; padding: 1px 5px;
+  }
+
+  /* Reading-flow-only view */
+  #flow:checked ~ .stage .mark:not(.isflow) { opacity: 0.28; }
+  #flow:checked ~ .stage .mark:not(.isflow):hover { opacity: 1; }
+  #flow:checked ~ .stage .note:not(.isflow) { opacity: 0.4; }
+
+  /* The [?] help button the overlay hangs off */
+  .help {
+    position: absolute; right: 1.1cqw; bottom: 1.1cqw;
+    width: 2.4cqw; height: 2.4cqw; border-radius: 50%;
+    background: var(--panel); border: 1px solid var(--hair);
+    box-shadow: 0 2px 6px rgba(16, 24, 40, 0.22);
+    color: var(--accent); font-size: 1.3cqw; font-weight: 700; line-height: 2.4cqw;
+    text-align: center; z-index: 7;
+  }
+  .helptag {
+    position: absolute; right: 4.2cqw; bottom: 1.45cqw; z-index: 7;
+    font-size: 1cqw; color: #ffffff; background: rgba(20, 28, 40, 0.72);
+    border-radius: 4px; padding: 0.15cqw 0.5cqw; white-space: nowrap;
+  }
+
+  /* Notes panel */
+  .panel { display: none; }
+  @media (min-width: 1180px) {
+    .panel {
+      display: block; position: sticky; top: 16px; max-height: calc(100vh - 40px);
+      overflow-y: auto; padding-right: 4px;
+    }
+  }
+  .panel h2 {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 18px 0 8px;
+  }
+  .panel h2:first-child { margin-top: 0; }
+  .note {
+    display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 0 10px;
+    padding: 9px 10px; border-radius: 9px; border: 1px solid transparent;
+  }
+  .note.on { background: var(--accent-soft); border-color: var(--accent); }
+  .note .n {
+    width: 20px; height: 20px; border-radius: 10px; background: var(--accent);
+    color: var(--accent-ink); font-size: 11px; font-weight: 600; line-height: 20px;
+    text-align: center; font-variant-numeric: tabular-nums;
+  }
+  .note.isflow .n { background: var(--flow); color: var(--flow-ink); }
+  .note h3 { margin: 1px 0 5px; font-size: 13.5px; font-weight: 600; }
+  .note p { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--ink-soft); }
+
+  /* Narrow viewports keep every note under the window. */
+  .stacked { margin-top: 22px; }
+  @media (min-width: 1180px) { .stacked { display: none; } }
+  .stacked .note { border: 1px solid var(--hair); background: var(--panel); margin-bottom: 8px; }
+
+  .order {
+    display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 18px;
+    padding: 12px 14px; border: 1px solid var(--hair); border-radius: 10px;
+    background: var(--panel); font-size: 12.5px; color: var(--ink-soft);
+  }
+  .order b { color: var(--ink); font-weight: 600; }
+  .order i {
+    display: inline-block; width: 18px; height: 18px; border-radius: 9px;
+    background: var(--flow); color: var(--flow-ink); font-style: normal; font-size: 11px;
+    font-weight: 700; line-height: 18px; text-align: center; margin-right: 6px;
+  }
+
+  /* Skeleton primitives, positioned on the same canvas as the marks. */
+  .sk {
+    position: absolute;
+    left: calc(var(--l) / 20 * 1%);
+    top: calc(var(--t) / 11.52 * 1%);
+    width: calc(var(--w) / 20 * 1%);
+    height: calc(var(--h) / 11.52 * 1%);
+    background: var(--sk-bar); border-radius: 0.3cqw;
+  }
+  .sk.soft { background: var(--sk-bar-soft); }
+  .sk.plate { background: var(--sk-side); border-radius: 0; }
+  .sk.rail { background: var(--sk-rail); border-radius: 0; }
+  .sk.title { background: var(--sk-title); border-radius: 0; }
+  .sk.card { background: var(--sk-card); border: 1px solid var(--sk-line); border-radius: 0.45cqw; }
+  .sk.sel { background: var(--sk-sel); border-radius: 0.45cqw; }
+  .sk.onsel { background: var(--sk-on-sel); }
+  .sk.line { background: var(--sk-line); border-radius: 0; }
+  .sk.dot { border-radius: 50%; }
+  .sk.pill { border-radius: 1cqw; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="bar">
+    <h1>Pod page</h1>
+    <p>What each part of the screen holds, and what it tells you. Hover a lit region for its note.</p>
+  </header>
+
+  <input type="checkbox" id="flow" class="sw-in" hidden>
+  <input type="checkbox" id="skel" class="sw-in" hidden>
+  <div class="toggles">
+    <label class="sw"><input type="checkbox" data-for="flow">Reading flow only</label>
+    <label class="sw"><input type="checkbox" data-for="skel">Skeleton</label>
+    <span class="hint">The [?] at the window's bottom right is the control that opens this overlay.</span>
+  </div>
+
+  <div class="stage">
+    <div>
+      <div class="window">
+        <img class="shot" alt="The pod page of the macOS application, dimmed under the overlay"
+             src="../screenshots/incident-detail.png">
+        <div class="skeleton" id="skcanvas"></div>
+        <svg class="scrim" viewBox="0 0 2000 1152" preserveAspectRatio="none" aria-hidden="true">
+          <defs><mask id="holes">
+            <rect x="0" y="0" width="2000" height="1152" fill="#fff"></rect>
+            <g id="holeg" fill="#000"></g>
+          </mask></defs>
+          <rect x="0" y="0" width="2000" height="1152" fill="var(--scrim)" mask="url(#holes)"></rect>
+        </svg>
+        <div id="marks"></div>
+        <div class="helptag">opens this overlay</div>
+        <div class="help">?</div>
+      </div>
+      <div class="order">
+        <span><i>1</i><b>Tag and counts</b> - is the pod serving, how much is broken</span>
+        <span><i>2</i><b>Verdict</b> - the answer in sentences</span>
+        <span><i>3</i><b>Kubelet facts</b> - the evidence behind it</span>
+        <span><i>4</i><b>Captured logs</b> - what the process said</span>
+        <span><i>5</i><b>Rail</b> - owner, place, time, siblings</span>
+      </div>
+      <div class="stacked" id="stacked"></div>
+    </div>
+    <aside class="panel" id="panel"></aside>
+  </div>
+</div>
+
+<script>
+  // One source of truth for the coach marks, the scrim's cut-outs and the notes:
+  // coordinates are read off the screenshot in its own 2000 x 1152 space.
+  var REGIONS = [
+    { n: 1, l: 337, t: 14, w: 112, h: 42, g: "Window chrome", side: "r",
+      title: "Cluster scope menu",
+      tags: ["GET /clusters", "cluster_id"],
+      text: "The checklist of clusters every list is filtered by, kept across screens and launches. A cluster drawn red has a stored connection error, so its rows may be stale." },
+    { n: 2, l: 458, t: 14, w: 98, h: 42, g: "Window chrome", side: "r",
+      title: "Back and forward",
+      tags: ["Cmd-[", "Cmd-]"],
+      text: "Back returns to whatever opened this page: a list row, a workload's pods, a sibling pod. Forward returns to where Back came from, so a detour costs nothing." },
+    { n: 3, l: 566, t: 14, w: 352, h: 42, g: "Window chrome", side: "r",
+      title: "Window title",
+      tags: ["pods.name"],
+      text: "The pod's name, display only. The page itself is keyed by uid, because names get reused and uids do not." },
+    { n: 4, l: 1884, t: 14, w: 104, h: 42, g: "Window chrome", side: "l",
+      title: "Copy uid",
+      tags: ["pods.uid"],
+      text: "Puts the raw uid on the clipboard. That is the value to paste into kubectl, a ticket or a question to an agent; the name alone does not identify one pod over time." },
+    { n: 5, l: 10, t: 76, w: 308, h: 1064, g: "Window chrome", side: "r",
+      title: "Sidebar, Screens only",
+      tags: ["GET /incidents/counts"],
+      text: "Screens stays while a pod page is pushed, so you can leave for the list at any time. The View and Category filters do not stay: they narrow a list, and this is one pod." },
+
+    { n: 6, l: 352, t: 86, w: 184, h: 30, g: "Pod header", side: "r", flow: 1,
+      title: "Pod state tag",
+      tags: ["pods.phase", "conditions[Ready]", "deleted_at"],
+      text: "Look here first. The kubelet keeps reporting phase Running while every container fails, so the Ready condition is what says the pod is not serving. It reads LOOPING when readiness flipped more than three times in the window, and DELETED once the pod is gone." },
+    { n: 7, l: 544, t: 86, w: 468, h: 30, g: "Pod header", side: "r", flow: 1,
+      title: "Counts line",
+      tags: ["containers", "incidents", "pods.node_name"],
+      text: "How many containers, how many incidents and how many are still open, then the node. One open incident out of six containers is a different morning from six out of six, and a node repeated across failing pods is the next thing to check." },
+    { n: 8, l: 352, t: 122, w: 540, h: 38, g: "Pod header", side: "r",
+      title: "Title",
+      tags: ["pods.name"],
+      text: "The subject of the page, never elided and always selectable. Detail pages show names whole; only lists shorten them to the suffix after the workload prefix." },
+    { n: 9, l: 352, t: 164, w: 840, h: 30, g: "Pod header", side: "r",
+      title: "Identity breadcrumb",
+      tags: ["cluster_id", "namespace", "workload_kind", "controller_kind"],
+      text: "The stored identity chain, cluster to namespace to workload to controller, stopping before the pod. Each segment opens that level, so this is the way to ask whether the neighbours are failing too." },
+
+    { n: 10, l: 348, t: 226, w: 292, h: 122, g: "Left column", side: "r",
+      title: "Pod card",
+      tags: ["GET /pods/{uid}", "artifacts"],
+      text: "Selecting it swaps the middle pane to the pod's own material: every container's events, the conditions and their history, the files, and the captured pod object. Its subline counts what idios actually kept, so you know before clicking whether there is anything to read." },
+    { n: 11, l: 348, t: 360, w: 292, h: 110, g: "Left column", side: "r",
+      title: "Container cards",
+      tags: ["containers.kind", "category", "occurrences"],
+      text: "One card per container, init then app then sidecar then ephemeral, the selected one filled with the accent. Each badge is one incident with its category and how many times it has happened, so this column says whether one container is failing or the whole pod is." },
+
+    { n: 12, l: 1036, t: 224, w: 538, h: 42, g: "Middle pane", side: "l",
+      title: "Action row",
+      tags: ["POST /incidents/{id}/acknowledge", "/prompt"],
+      text: "Acknowledge is the one primary button and shows its key, so the letter is learned where it is used; it says a person has seen this, not that it is fixed. Note writes a sentence that outlives you, Ask AI copies a prompt or a sanitized snapshot, and the rest sit under Actions." },
+    { n: 13, l: 666, t: 270, w: 904, h: 80, g: "Middle pane", side: "l", flow: 2,
+      title: "Verdict block",
+      tags: ["occurrences", "mem_limit_bytes", "capture_gap", "image_id"],
+      text: "Read this second, and often stop here: sentences built from fields the page already holds. What happened and how often since when, the memory limit when the kill was an OOM, what was and was not captured, and whether the image digest changed since the incident opened." },
+    { n: 14, l: 688, t: 374, w: 452, h: 30, g: "Middle pane", side: "r",
+      title: "Category, state, id and occurrences",
+      tags: ["incidents.category", "state", "occurrences"],
+      text: "The category is what kind of failure this is; the state is whether anyone has dealt with it and for how long it has run. Occurrences is the restarts attached to this one incident: a crash loop is one incident with a climbing number, never forty incidents." },
+    { n: 15, l: 688, t: 408, w: 716, h: 44, g: "Middle pane", side: "l",
+      title: "Incident sentence",
+      tags: ["container_name", "exit_code", "last_reason"],
+      text: "The failure stated as a person would say it: which container of which owner, the exit code, and the reason the kubelet last gave. It is the line to paste into a message when you hand the problem on." },
+    { n: 16, l: 688, t: 456, w: 736, h: 50, g: "Middle pane", side: "l",
+      title: "Explanation",
+      tags: ["k8s_events", "last_message"],
+      text: "The kubelet's or a controller's own wording for the same failure, kept because it often names the missing secret, the unreachable registry or the failing probe. Its provenance is on hover, so an observation is never mistaken for an inference." },
+    { n: 17, l: 676, t: 538, w: 340, h: 40, g: "Middle pane", side: "r",
+      title: "Tab strip",
+      tags: ["/incidents/{id}/timeline", "/artifacts"],
+      text: "Overview is the facts, the files and the container's events; Timeline is the incident's window with repeating cycles folded into one entry; Logs gives the capture card the whole pane and counts the files that exist. Switching the lit incident changes the header and the timeline, nothing else." },
+    { n: 18, l: 666, t: 614, w: 904, h: 356, g: "Middle pane", side: "l", flow: 3,
+      title: "What the kubelet reports",
+      tags: ["restart_count", "last_terminated_reason", "image_id", "mem_limit_bytes"],
+      text: "Read this third: the evidence the verdict was built from, in the kubelet's own words. Restart count is the container's whole life while occurrences above is this incident's share of it, and the image and digest are the ones recorded when the incident opened, not the current ones." },
+    { n: 19, l: 666, t: 992, w: 904, h: 150, g: "Middle pane", side: "l", flow: 4,
+      title: "Captured logs",
+      tags: ["artifacts", "capture_gap", "capture_note"],
+      text: "Read this fourth. The scrubber walks one file per dead instance, oldest to newest, so you can see whether every attempt failed the same way. A missing file is never an empty pane: the gap is named and the API's own words are quoted, which separates a container that printed nothing from a log that could never have been fetched." },
+
+    { n: 20, l: 1598, t: 220, w: 392, h: 304, g: "Right rail", side: "l", flow: 5,
+      title: "Owner chain",
+      tags: ["workload_kind", "controller_kind", "pod_uid", "container_name"],
+      text: "Read this last, when the verdict is not enough: four links from what decides how many copies run down to the process that failed, each with the uid that identifies it. It answers who will replace this pod, and whether the thing to change is this container or the workload above it." },
+    { n: 21, l: 1598, t: 542, w: 392, h: 144, g: "Right rail", side: "l",
+      title: "Context",
+      tags: ["node_name", "qos_class", "image_id", "container_id"],
+      text: "Where it ran and which build it ran. The image id is the resolved digest, which is what settles same tag, different image; identifiers are middle-elided so both ends stay readable and the raw value is what gets copied." },
+    { n: 22, l: 1598, t: 700, w: 392, h: 176, g: "Right rail", side: "l",
+      title: "Times",
+      tags: ["opened_at", "last_seen_at", "acknowledged_at"],
+      text: "The times of whatever is selected: the lit incident's, or the pod's when nothing is lit. Each is labelled k8s or observed, which matters when a laptop slept, since one is when it happened and the other is when idios saw it. Every time is UTC." },
+    { n: 23, l: 1598, t: 892, w: 392, h: 130, g: "Right rail", side: "l",
+      title: "Siblings",
+      tags: ["controller_uid", "category"],
+      text: "This pod first, then the others of the same controller, with a category badge where one is failing and a readiness word where none is. One red dot among green is this pod's problem; all red is the image, the config or the cluster." },
+  ];
+
+  // The skeleton: the same layout in the app's light chrome, every string a bar.
+  // [class, left, top, width, height] in the same 2000 x 1152 space.
+  var SK = [
+    ["title", 0, 0, 2000, 68], ["plate", 0, 68, 327, 1084], ["rail", 1585, 208, 415, 944],
+    ["line", 327, 68, 1, 1084], ["line", 645, 208, 1, 944], ["line", 1585, 208, 1, 944],
+    ["line", 327, 208, 1673, 1],
+    ["dot soft", 26, 27, 15, 15], ["dot soft", 54, 27, 15, 15], ["dot soft", 82, 27, 15, 15],
+    ["soft", 286, 26, 18, 16],
+    ["soft", 337, 20, 112, 30], ["soft", 462, 20, 42, 30], ["soft", 508, 20, 42, 30],
+    ["bar", 566, 27, 300, 15], ["soft", 1884, 20, 104, 30],
+    ["soft", 32, 76, 58, 9],
+    ["sel", 22, 95, 292, 40], ["onsel", 40, 108, 16, 14], ["onsel", 66, 109, 92, 13],
+    ["bar", 22, 138, 292, 39, "soft"], ["bar", 40, 151, 16, 14], ["bar", 66, 152, 98, 13],
+    ["bar", 40, 193, 16, 14], ["bar", 66, 194, 62, 13],
+    ["pill", 352, 88, 184, 26], ["bar", 546, 94, 430, 13],
+    ["bar", 354, 126, 500, 26], ["bar", 354, 168, 156, 15], ["bar", 522, 168, 118, 15],
+    ["bar", 652, 168, 216, 15], ["bar", 880, 168, 300, 15],
+    ["soft", 356, 236, 34, 10], ["bar", 356, 256, 208, 14], ["bar", 356, 276, 156, 14],
+    ["soft", 356, 300, 232, 10], ["soft", 356, 318, 108, 10],
+    ["sel", 344, 358, 288, 108], ["onsel", 376, 370, 46, 12], ["onsel", 432, 371, 30, 10],
+    ["onsel", 376, 392, 200, 11], ["onsel", 376, 410, 88, 11],
+    ["onsel", 376, 434, 84, 20, "pill"],
+    ["soft", 1046, 228, 168, 34], ["soft", 1228, 228, 84, 34], ["sel", 1325, 228, 108, 34],
+    ["soft", 1443, 228, 126, 34],
+    ["bar", 668, 278, 470, 14], ["soft", 668, 302, 296, 14], ["soft", 668, 326, 316, 14],
+    ["soft", 695, 380, 68, 22, "pill"], ["soft", 775, 380, 84, 22, "pill"],
+    ["soft", 878, 384, 244, 13],
+    ["bar", 690, 414, 686, 28], ["soft", 690, 462, 700, 15], ["soft", 690, 484, 418, 15],
+    ["soft", 686, 542, 104, 32, "pill"], ["soft", 806, 550, 66, 15], ["soft", 896, 550, 96, 15],
+    ["card", 668, 616, 900, 352], ["bar", 686, 636, 240, 13],
+    ["card", 668, 996, 900, 300], ["bar", 686, 1012, 112, 14], ["soft", 1486, 1010, 62, 16],
+    ["soft", 686, 1044, 60, 12], ["soft", 762, 1044, 96, 12], ["soft", 940, 1042, 44, 16],
+    ["soft", 686, 1076, 864, 76],
+    ["soft", 1608, 228, 108, 10],
+    ["dot", 1608, 262, 9, 9], ["soft", 1632, 258, 148, 10], ["bar", 1632, 276, 108, 13],
+    ["dot", 1608, 314, 9, 9], ["soft", 1632, 310, 156, 10], ["bar", 1632, 328, 138, 13],
+    ["soft", 1632, 350, 96, 9],
+    ["dot", 1608, 386, 9, 9], ["soft", 1632, 382, 132, 10], ["bar", 1632, 400, 150, 13],
+    ["soft", 1632, 422, 120, 9],
+    ["dot", 1608, 458, 9, 9], ["soft", 1632, 454, 72, 10], ["bar", 1632, 472, 40, 13],
+    ["soft", 1632, 494, 116, 9],
+    ["soft", 1608, 552, 62, 10],
+    ["soft", 1608, 574, 46, 11], ["bar", 1738, 574, 66, 11],
+    ["soft", 1608, 596, 66, 11], ["bar", 1738, 596, 76, 11],
+    ["soft", 1608, 618, 56, 11], ["bar", 1738, 618, 226, 11],
+    ["soft", 1608, 658, 76, 11], ["bar", 1738, 658, 176, 11],
+    ["soft", 1608, 716, 118, 10],
+    ["soft", 1608, 738, 50, 11], ["bar", 1738, 736, 236, 11],
+    ["soft", 1608, 774, 66, 11], ["bar", 1738, 772, 236, 11],
+    ["soft", 1608, 812, 60, 11], ["bar", 1738, 812, 28, 11],
+    ["soft", 1608, 834, 92, 11], ["bar", 1738, 834, 34, 11],
+    ["soft", 1608, 856, 68, 11], ["bar", 1738, 856, 34, 11],
+    ["soft", 1608, 908, 186, 10],
+    ["dot", 1608, 934, 9, 9], ["bar", 1626, 932, 146, 12], ["soft", 1918, 932, 56, 10],
+    ["dot", 1608, 964, 9, 9], ["bar", 1626, 962, 146, 12], ["soft", 1908, 958, 66, 18, "pill"],
+    ["dot", 1608, 994, 9, 9], ["bar", 1626, 992, 146, 12], ["soft", 1908, 988, 66, 18, "pill"],
+  ];
+
+  (function () {
+    var marks = document.getElementById("marks");
+    var holes = document.getElementById("holeg");
+    var panel = document.getElementById("panel");
+    var stacked = document.getElementById("stacked");
+    var notes = {};
+    var group = null;
+
+    function noteEl(r, into) {
+      var el = document.createElement("div");
+      el.className = "note" + (r.flow ? " isflow" : "");
+      el.innerHTML =
+        '<div class="n">' + r.n + "</div><div><h3>" + r.title + "</h3>" +
+        '<div class="tags">' + r.tags.map(function (t) { return "<code>" + t + "</code>"; }).join("") +
+        "</div><p>" + r.text + "</p></div>";
+      into.appendChild(el);
+      return el;
+    }
+
+    REGIONS.forEach(function (r) {
+      var hole = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      hole.setAttribute("x", r.l); hole.setAttribute("y", r.t);
+      hole.setAttribute("width", r.w); hole.setAttribute("height", r.h);
+      hole.setAttribute("rx", 5);
+      holes.appendChild(hole);
+
+      // A div, not a button: the note it carries is flow content, which a
+      // button may not hold.
+      var b = document.createElement("div");
+      b.setAttribute("role", "button");
+      b.tabIndex = 0;
+      b.className = "mark" + (r.flow ? " isflow" : "");
+      b.style.cssText = "--l:" + r.l + ";--t:" + r.t + ";--w:" + r.w + ";--h:" + r.h;
+      b.setAttribute("aria-label", r.n + ". " + r.title);
+      b.innerHTML =
+        '<span class="pill">' + r.n + "</span>" +
+        (r.flow ? '<span class="step">' + r.flow + "</span>" : "") +
+        '<div class="tip ' + r.side + '"><h4>' + r.title + "</h4>" +
+        '<div class="tags">' + r.tags.map(function (t) { return "<code>" + t + "</code>"; }).join("") +
+        "</div><p>" + r.text + "</p></div>";
+      marks.appendChild(b);
+
+      if (r.g !== group) {
+        group = r.g;
+        var h = document.createElement("h2");
+        h.textContent = group;
+        panel.appendChild(h);
+        var h2 = h.cloneNode(true);
+        stacked.appendChild(h2);
+      }
+      notes[r.n] = noteEl(r, panel);
+      noteEl(r, stacked);
+
+      var on = function () { notes[r.n].classList.add("on"); };
+      var off = function () { notes[r.n].classList.remove("on"); };
+      b.addEventListener("mouseenter", on);
+      b.addEventListener("mouseleave", off);
+      b.addEventListener("focus", on);
+      b.addEventListener("blur", off);
+      // Touch has no hover: a tap pins the note until the next tap elsewhere.
+      b.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); b.click(); }
+      });
+      b.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var was = b.classList.contains("pin");
+        Array.prototype.forEach.call(marks.children, function (m) { m.classList.remove("pin"); });
+        if (!was) { b.classList.add("pin"); on(); } else { off(); }
+      });
+    });
+    document.addEventListener("click", function () {
+      Array.prototype.forEach.call(marks.children, function (m) { m.classList.remove("pin"); });
+    });
+
+    var canvas = document.getElementById("skcanvas");
+    SK.forEach(function (s) {
+      var d = document.createElement("div");
+      d.className = "sk " + s[0] + (s[5] ? " " + s[5] : "");
+      d.style.cssText = "--l:" + s[1] + ";--t:" + s[2] + ";--w:" + s[3] + ";--h:" + s[4];
+      canvas.appendChild(d);
+    });
+
+    // The two visible switches drive the hidden checkboxes the CSS listens to.
+    Array.prototype.forEach.call(document.querySelectorAll("[data-for]"), function (box) {
+      var real = document.getElementById(box.getAttribute("data-for"));
+      box.checked = real.checked;
+      box.addEventListener("change", function () { real.checked = box.checked; });
+    });
+  })();
+</script>

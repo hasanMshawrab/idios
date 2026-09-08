@@ -1,0 +1,2 @@
+{"metadata":{"name":"standalone","namespace":"idios-smoke","uid":"rs-bare","creationTimestamp":"2026-08-27T11:44:00Z"},
+ "spec":{"replicas":1,"template":{"spec":{"containers":[{"name":"app","image":"busybox:1.36"}]}}}}

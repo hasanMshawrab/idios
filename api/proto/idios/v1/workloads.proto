@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package idios.v1;
+
+import "idios/v1/common.proto";
+import "idios/v1/jobs.proto";
+import "idios/v1/pods.proto";
+import "sebuf/http/annotations.proto";
+
+option go_package = "github.com/hasanMshawrab/idios/internal/apigen/idiosv1;idiosv1";
+
+// WorkloadRow is one row of the workload tree: everything seen for one
+// (cluster_id, namespace, workload_kind, workload_name). A pod no controller
+// owns is one row per pod instead, keyed on pod_uid.
+message WorkloadRow {
+  int64 cluster_id = 1 [(sebuf.http.field_examples) = {values: ["1", "2"]}];
+  string namespace = 2 [(sebuf.http.field_examples) = {values: ["shop", "payments"]}];
+  string workload_kind = 3 [(sebuf.http.field_examples) = {values: ["Deployment", "Job", "StatefulSet"]}];
+  string workload_name = 4 [(sebuf.http.field_examples) = {values: ["checkout-api"]}];
+  repeated CategoryCount incidents_by_category = 5;
+  int32 open_incidents = 6 [(sebuf.http.field_examples) = {values: ["1", "0", "3"]}];
+  int32 occurrences = 7 [(sebuf.http.field_examples) = {values: ["23", "7"]}];
+  // The tag each incident's image carried when it opened; empty for a
+  // digest-pinned image.
+  repeated TagCount image_tags = 8;
+  int32 live_pods = 9 [(sebuf.http.field_examples) = {values: ["2", "0"]}];
+  int32 deleted_pods = 10 [(sebuf.http.field_examples) = {values: ["4", "0"]}];
+  // Set only for kind "none": the controller-less pod this row is.
+  string pod_uid = 11 [(sebuf.http.field_examples) = {values: ["3c1d0b2a-77aa-4f31-9b02-5d6e7f801122"]}];
+  // Set only for kind "none".
+  string pod_name = 12 [(sebuf.http.field_examples) = {values: ["debug-shell"]}];
+}
+
+// WorkloadsResponse is the workload list.
+message WorkloadsResponse {
+  repeated WorkloadRow workloads = 1;
+  bool truncated = 2 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+}
+
+// ListWorkloadsRequest scopes and filters the workload list.
+message ListWorkloadsRequest {
+  repeated int64 cluster_ids = 1 [(sebuf.http.query) = {}];
+  string namespace = 2 [(sebuf.http.query) = {}];
+  // Zero means the daemon's configured default.
+  int32 limit = 3 [(sebuf.http.query) = {}];
+}
+
+// GetWorkloadRequest addresses one workload by its identity.
+message GetWorkloadRequest {
+  int64 cluster_id = 1;
+  string namespace = 2;
+  string kind = 3;
+  string name = 4;
+  // "true" for live pods, "false" for deleted ones, absent for both.
+  string pods_live = 5 [(sebuf.http.query) = {}];
+  // Zero means the daemon's configured default.
+  int32 pods_limit = 6 [(sebuf.http.query) = {}];
+}
+
+// Rollout is one ReplicaSet of a Deployment.
+message Rollout {
+  string replicaset_uid = 1 [(sebuf.http.field_examples) = {values: ["3c1d0b2a-77aa-4f31-9b02-5d6e7f801122"]}];
+  string replicaset_name = 2 [(sebuf.http.field_examples) = {values: ["checkout-api-7d9f8b6c4"]}];
+  optional int64 revision = 3 [(sebuf.http.field_examples) = {values: ["8", "7"]}];
+  // One image per container, in container_name order.
+  repeated string images = 4 [(sebuf.http.field_examples) = {values: ["registry.example.com/checkout-api:1.42.0"]}];
+  string first_seen_at = 5 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:02:58.331004Z"]}];
+  string last_seen_at = 6 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:09:41.115204Z"]}];
+  optional string deleted_at = 7 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:11:02.660713Z"]}];
+  int32 incidents = 8 [(sebuf.http.field_examples) = {values: ["3", "0"]}];
+  // The ReplicaSet's own creationTimestamp: when the revision shipped.
+  string created_at = 9 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:02:51.000000Z"]}];
+  // Absent when spec.replicas is unset on the object.
+  optional int32 replicas = 10 [(sebuf.http.field_examples) = {values: ["3", "0"]}];
+  // Absent until the ReplicaSet controller has observed the object.
+  optional int32 ready_replicas = 11 [(sebuf.http.field_examples) = {values: ["3", "0"]}];
+  optional int32 available_replicas = 12 [(sebuf.http.field_examples) = {values: ["3", "0"]}];
+}
+
+// HourBucket counts the terminated transitions of a workload's pods in one
+// hour of the retention window.
+message HourBucket {
+  string hour = 1 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:00:00.000000Z"]}];
+  int32 restarts = 2 [(sebuf.http.field_examples) = {values: ["7", "0"]}];
+  // True when any transition in the hour was inferred rather than seen.
+  bool reconstructed = 3 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+}
+
+// WorkloadDetail is everything the workload page shows.
+message WorkloadDetail {
+  WorkloadRow workload = 1;
+  // Empty for every kind but Deployment.
+  repeated Rollout rollouts = 2;
+  repeated HourBucket restarts_by_hour = 3;
+  repeated PodRow pods = 4;
+  // Set when pods_limit cut off more pods than it returned.
+  bool pods_truncated = 5;
+  // The workload's recent runs, newest first, bounded by the same page limit
+  // as the pods: the Jobs of a CronJob, or the single run of a Job workload.
+  // Empty for every other kind.
+  repeated JobRow runs = 6;
+}

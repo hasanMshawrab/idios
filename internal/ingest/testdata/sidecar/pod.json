@@ -1,0 +1,5 @@
+{"metadata":{"name":"web-1c2d3-side1","namespace":"idios-smoke","uid":"pod-side","creationTimestamp":"2026-08-27T11:45:00Z","ownerReferences":[{"apiVersion":"apps/v1","kind":"ReplicaSet","name":"web-1c2d3","uid":"rs-web-5","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Always","initContainers":[{"name":"proxy","image":"registry.example.com/envoy:1.30.0","restartPolicy":"Always"}],"containers":[{"name":"api","image":"registry.example.com/web:1.4.2"}]},
+ "status":{"phase":"Running","qosClass":"BestEffort","startTime":"2026-08-27T11:45:05Z",
+  "initContainerStatuses":[{"name":"proxy","image":"registry.example.com/envoy:1.30.0","imageID":"registry.example.com/envoy@sha256:6666","containerID":"containerd://sss","ready":true,"restartCount":0,"state":{"running":{"startedAt":"2026-08-27T11:45:06Z"}}}],
+  "containerStatuses":[{"name":"api","image":"registry.example.com/web:1.4.2","imageID":"registry.example.com/web@sha256:1111","containerID":"containerd://aaa3","ready":true,"restartCount":0,"state":{"running":{"startedAt":"2026-08-27T11:45:08Z"}}}]}}

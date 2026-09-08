@@ -1,0 +1,23 @@
+#!/bin/sh
+# Usage: hack/ascii-check [file...]
+# With no files, checks every git-tracked file except the generated code
+# under internal/apigen, which sebuf writes and nobody here edits. Prints
+# file:line for each line holding a byte outside tab, newline and
+# 0x20-0x7E. The check mark U+2713 is the one allowed exception. Exit 1 if
+# anything was printed.
+# A .png is skipped wherever it appears, named or not: the icon assets
+# hack/macos/icon.py writes are binary, and the pre-commit hook passes
+# staged paths by name, so filtering only the no-argument walk would let
+# them through.
+# perl, not grep -P: macOS grep has no -P and would fail silently.
+if [ $# -eq 0 ]; then
+    git ls-files -z | grep -zv '^internal/apigen/' | xargs -0 "$0"
+    exit $?
+fi
+LC_ALL=C perl -ne '
+    if ($ARGV =~ /\.png$/) { close ARGV; next }
+    s/\xE2\x9C\x93//g;
+    if (/[^\x09\x0A\x20-\x7E]/) { print "$ARGV:$.\n"; $bad = 1 }
+    close ARGV if eof;
+    END { exit($bad ? 1 : 0) }
+' "$@"

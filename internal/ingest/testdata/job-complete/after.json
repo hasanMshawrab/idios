@@ -1,0 +1,3 @@
+{"metadata":{"name":"report-28812350","namespace":"idios-smoke","uid":"job-report-2","creationTimestamp":"2026-08-27T11:45:00Z"},
+ "spec":{"backoffLimit":2,"completions":1,"parallelism":1,"template":{"spec":{"restartPolicy":"Never","containers":[{"name":"report","image":"registry.example.com/report:0.9.1"}]}}},
+ "status":{"succeeded":1,"startTime":"2026-08-27T11:50:02Z","completionTime":"2026-08-27T11:52:00Z","conditions":[{"type":"SuccessCriteriaMet","status":"True","lastTransitionTime":"2026-08-27T11:52:00Z"},{"type":"Complete","status":"True","lastTransitionTime":"2026-08-27T11:52:00Z"}]}}

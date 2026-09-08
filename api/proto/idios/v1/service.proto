@@ -1,0 +1,252 @@
+syntax = "proto3";
+
+package idios.v1;
+
+import "idios/v1/artifacts.proto";
+import "idios/v1/clusters.proto";
+import "idios/v1/incidents.proto";
+import "idios/v1/jobs.proto";
+import "idios/v1/pods.proto";
+import "idios/v1/status.proto";
+import "idios/v1/workloads.proto";
+import "sebuf/http/annotations.proto";
+
+option go_package = "github.com/hasanMshawrab/idios/internal/apigen/idiosv1;idiosv1";
+
+// IdiosService is the recorder's API: one operation per list or detail a
+// screen needs, the two live streams, and the write operations behind the
+// application's actions.
+service IdiosService {
+  option (sebuf.http.service_config) = {base_path: "/v1"};
+
+  rpc ListClusters(ListClustersRequest) returns (ClustersResponse) {
+    option (sebuf.http.config) = {
+      path: "/clusters"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc ListKubeContexts(ListKubeContextsRequest) returns (KubeContextsResponse) {
+    option (sebuf.http.config) = {
+      path: "/kube/contexts"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // The only read that talks to a cluster, used by the add-cluster flow.
+  rpc ListKubeNamespaces(ListKubeNamespacesRequest) returns (KubeNamespacesResponse) {
+    option (sebuf.http.config) = {
+      path: "/kube/contexts/{context}/namespaces"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc ListIncidents(ListIncidentsRequest) returns (IncidentsResponse) {
+    option (sebuf.http.config) = {
+      path: "/incidents"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetIncidentCounts(GetIncidentCountsRequest) returns (IncidentCounts) {
+    option (sebuf.http.config) = {
+      path: "/incidents/counts"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetIncident(GetIncidentRequest) returns (IncidentDetail) {
+    option (sebuf.http.config) = {
+      path: "/incidents/{id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc IncidentTimeline(IncidentTimelineRequest) returns (TimelineResponse) {
+    option (sebuf.http.config) = {
+      path: "/incidents/{id}/timeline"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc StreamIncidents(StreamIncidentsRequest) returns (IncidentRow) {
+    option (sebuf.http.config) = {
+      path: "/incidents/stream"
+      method: HTTP_METHOD_GET
+      stream: true
+    };
+  }
+
+  rpc StreamClusters(StreamClustersRequest) returns (Cluster) {
+    option (sebuf.http.config) = {
+      path: "/clusters/stream"
+      method: HTTP_METHOD_GET
+      stream: true
+    };
+  }
+
+  rpc ListPods(ListPodsRequest) returns (PodsResponse) {
+    option (sebuf.http.config) = {
+      path: "/pods"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetPod(GetPodRequest) returns (PodDetail) {
+    option (sebuf.http.config) = {
+      path: "/pods/{uid}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc PodEvents(PodEventsRequest) returns (EventsResponse) {
+    option (sebuf.http.config) = {
+      path: "/pods/{uid}/events"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc PodHistory(PodHistoryRequest) returns (HistoryResponse) {
+    option (sebuf.http.config) = {
+      path: "/pods/{uid}/history"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetArtifact(GetArtifactRequest) returns (Artifact) {
+    option (sebuf.http.config) = {
+      path: "/artifacts/{id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc ListWorkloads(ListWorkloadsRequest) returns (WorkloadsResponse) {
+    option (sebuf.http.config) = {
+      path: "/workloads"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // name is required: a pod without a controller belongs to workload kind
+  // none with an empty name, and that workload has no detail. A client
+  // shows it from the list row and from ListPods filtered by
+  // workload_kind=none.
+  rpc GetWorkload(GetWorkloadRequest) returns (WorkloadDetail) {
+    option (sebuf.http.config) = {
+      path: "/workloads/{cluster_id}/{namespace}/{kind}/{name}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc ListJobs(ListJobsRequest) returns (JobsResponse) {
+    option (sebuf.http.config) = {
+      path: "/jobs"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetStatus(GetStatusRequest) returns (Status) {
+    option (sebuf.http.config) = {
+      path: "/status"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc AcknowledgeIncident(AcknowledgeIncidentRequest) returns (IncidentRow) {
+    option (sebuf.http.config) = {
+      path: "/incidents/{id}/acknowledge"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UnacknowledgeIncident(UnacknowledgeIncidentRequest) returns (IncidentRow) {
+    option (sebuf.http.config) = {
+      path: "/incidents/{id}/acknowledge"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc ResolveIncident(ResolveIncidentRequest) returns (IncidentRow) {
+    option (sebuf.http.config) = {
+      path: "/incidents/{id}/resolve"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UnresolveIncident(UnresolveIncidentRequest) returns (IncidentRow) {
+    option (sebuf.http.config) = {
+      path: "/incidents/{id}/resolve"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc DismissIncident(DismissIncidentRequest) returns (IncidentRow) {
+    option (sebuf.http.config) = {
+      path: "/incidents/{id}/dismiss"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UndismissIncident(UndismissIncidentRequest) returns (IncidentRow) {
+    option (sebuf.http.config) = {
+      path: "/incidents/{id}/dismiss"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc SetIncidentNote(SetIncidentNoteRequest) returns (IncidentRow) {
+    option (sebuf.http.config) = {
+      path: "/incidents/{id}/note"
+      method: HTTP_METHOD_PUT
+    };
+  }
+
+  rpc DeleteIncident(DeleteIncidentRequest) returns (DeleteIncidentResponse) {
+    option (sebuf.http.config) = {
+      path: "/incidents/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc AddCluster(AddClusterRequest) returns (Cluster) {
+    option (sebuf.http.config) = {
+      path: "/clusters"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc RenameCluster(RenameClusterRequest) returns (Cluster) {
+    option (sebuf.http.config) = {
+      path: "/clusters/{id}"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+
+  rpc SetClusterGrafana(SetClusterGrafanaRequest) returns (Cluster) {
+    option (sebuf.http.config) = {
+      path: "/clusters/{id}/grafana"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+
+  rpc DeleteCluster(DeleteClusterRequest) returns (DeleteClusterResponse) {
+    option (sebuf.http.config) = {
+      path: "/clusters/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc AddWatchedNamespace(AddWatchedNamespaceRequest) returns (Cluster) {
+    option (sebuf.http.config) = {
+      path: "/clusters/{id}/namespaces"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc RemoveWatchedNamespace(RemoveWatchedNamespaceRequest) returns (Cluster) {
+    option (sebuf.http.config) = {
+      path: "/clusters/{id}/namespaces/{name}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+}

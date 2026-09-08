@@ -1,0 +1,2 @@
+{"metadata":{"name":"web-7d9f8c6b5","namespace":"idios-smoke","uid":"rs-web-1","creationTimestamp":"2026-08-27T11:44:00Z","annotations":{"deployment.kubernetes.io/revision":"7"},"ownerReferences":[{"apiVersion":"apps/v1","kind":"Deployment","name":"web","uid":"dep-web","controller":true}]},
+ "spec":{"replicas":3,"template":{"spec":{"containers":[{"name":"api","image":"registry.example.com/web:1.4.2"},{"name":"worker","image":"registry.example.com/worker@sha256:7777"}]}}}}

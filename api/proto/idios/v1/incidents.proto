@@ -1,0 +1,238 @@
+syntax = "proto3";
+
+package idios.v1;
+
+import "idios/v1/artifacts.proto";
+import "idios/v1/common.proto";
+import "idios/v1/jobs.proto";
+import "sebuf/http/annotations.proto";
+
+option go_package = "github.com/hasanMshawrab/idios/internal/apigen/idiosv1;idiosv1";
+
+// IncidentRow is one row of the triage list: the incidents columns, the
+// derived state, and the pod facts the list shows beside them.
+message IncidentRow {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["412", "413"]}];
+  int64 cluster_id = 2 [(sebuf.http.field_examples) = {values: ["1", "2"]}];
+  string namespace = 3 [(sebuf.http.field_examples) = {values: ["shop", "payments"]}];
+  SubjectKind subject_kind = 4;
+  optional string pod_uid = 5 [(sebuf.http.field_examples) = {values: ["8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70"]}];
+  optional string job_uid = 6 [(sebuf.http.field_examples) = {values: ["6d3a1f80-9c2b-4e77-b1a5-0e9f8d7c6b5a"]}];
+  string container_name = 7 [(sebuf.http.field_examples) = {values: ["checkout-api", ""]}];
+  string workload_kind = 8 [(sebuf.http.field_examples) = {values: ["Deployment", "Job"]}];
+  string workload_name = 9 [(sebuf.http.field_examples) = {values: ["checkout-api"]}];
+  Category category = 10;
+  string first_reason = 11 [(sebuf.http.field_examples) = {values: ["Error", "CrashLoopBackOff"]}];
+  string last_reason = 12 [(sebuf.http.field_examples) = {values: ["CrashLoopBackOff", "OOMKilled"]}];
+  optional string last_message = 13 [(sebuf.http.field_examples) = {values: ["back-off 5m0s restarting failed container=checkout-api"]}];
+  optional string image = 14 [(sebuf.http.field_examples) = {values: ["registry.example.com/checkout-api:1.42.0"]}];
+  optional string image_tag = 15 [(sebuf.http.field_examples) = {values: ["1.42.0"]}];
+  optional string image_id = 16 [(sebuf.http.field_examples) = {values: ["registry.example.com/checkout-api@sha256:9f2e5c0a1b7d4e6f8a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f"]}];
+  int32 occurrences = 17 [(sebuf.http.field_examples) = {values: ["7", "1", "23"]}];
+  string opened_at = 18 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:11.482913Z"]}];
+  string last_seen_at = 19 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:09:41.115204Z"]}];
+  optional string closed_at = 20 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:19:03.220118Z"]}];
+  optional CloseReason close_reason = 21;
+  optional string acknowledged_at = 22 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:05:00.000000Z"]}];
+  optional string dismissed_at = 23 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:22:31.771903Z"]}];
+  optional string note = 24 [(sebuf.http.field_examples) = {values: ["waiting on the 1.42.1 image"]}];
+  IncidentState state = 25;
+  optional string pod_name = 26 [(sebuf.http.field_examples) = {values: ["checkout-api-7d9f8b6c4-x2kqp"]}];
+  optional string pod_deleted_at = 27 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:11:02.660713Z"]}];
+  optional DeletionReason pod_deletion_reason = 28;
+  int32 container_count = 29 [(sebuf.http.field_examples) = {values: ["2", "1"]}];
+  optional int32 exit_code = 30 [(sebuf.http.field_examples) = {values: ["137", "1"]}];
+  optional int32 signal = 31 [(sebuf.http.field_examples) = {values: ["9"]}];
+  // The node the pod was on when the incident opened, denormalised at open;
+  // absent for a job incident and for a pod that had no node yet.
+  optional string node_name = 32 [(sebuf.http.field_examples) = {values: ["node-a", "node-b"]}];
+}
+
+// IncidentsResponse is the triage list.
+message IncidentsResponse {
+  repeated IncidentRow incidents = 1;
+  bool truncated = 2 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+}
+
+// ListIncidentsRequest scopes and filters the triage list. An empty filter
+// means the filter is not applied.
+message ListIncidentsRequest {
+  repeated int64 cluster_ids = 1 [(sebuf.http.query) = {}];
+  // One of open, acknowledged, recovered, pod_deleted, job_finished, manual,
+  // dismissed, attention.
+  string state = 2 [(sebuf.http.query) = {}];
+  // One of the Category values as stored: oom, crash, unclean_exit,
+  // image_pull, config, probe, scheduling, node_pressure, rescheduled,
+  // job_failed, stuck, other.
+  string category = 3 [(sebuf.http.query) = {}];
+  string namespace = 4 [(sebuf.http.query) = {}];
+  string workload_kind = 5 [(sebuf.http.query) = {}];
+  string workload_name = 6 [(sebuf.http.query) = {}];
+  string pod_uid = 7 [(sebuf.http.query) = {}];
+  string job_uid = 8 [(sebuf.http.query) = {}];
+  // Zero means the daemon's configured default.
+  int32 limit = 9 [(sebuf.http.query) = {}];
+  // Only the incidents opened on this node; a pod that had no node when its
+  // incident opened matches nothing.
+  string node_name = 10 [(sebuf.http.query) = {}];
+  // pod_name is an exact match on the pod's name, so a client holding a
+  // name from a truncated list still reaches its rows.
+  string pod_name = 11 [(sebuf.http.query) = {}];
+}
+
+// GetIncidentCountsRequest scopes the sidebar numbers. An empty filter means
+// the filter is not applied.
+message GetIncidentCountsRequest {
+  repeated int64 cluster_ids = 1 [(sebuf.http.query) = {}];
+  // One of open, acknowledged, recovered, pod_deleted, job_finished, manual,
+  // dismissed, attention.
+  string state = 2 [(sebuf.http.query) = {}];
+  // One of the Category values as stored: oom, crash, unclean_exit,
+  // image_pull, config, probe, scheduling, node_pressure, rescheduled,
+  // job_failed, stuck, other.
+  string category = 3 [(sebuf.http.query) = {}];
+}
+
+// IncidentCounts holds the sidebar numbers. Each list is faceted: it is
+// filtered by the other axis's request field, never by its own, so a count
+// answers what the list would hold once its own facet is picked.
+message IncidentCounts {
+  repeated StateCount by_state = 1;
+  repeated CategoryCount by_category = 2;
+}
+
+// GetIncidentRequest addresses one incidents row.
+message GetIncidentRequest {
+  int64 id = 1;
+}
+
+// SiblingPod is another pod of the same controller, live or deleted.
+message SiblingPod {
+  string uid = 1 [(sebuf.http.field_examples) = {values: ["a1b2c3d4-5e6f-4708-8192-a3b4c5d6e7f8"]}];
+  string name = 2 [(sebuf.http.field_examples) = {values: ["checkout-api-7d9f8b6c4-m4tzv"]}];
+  string phase = 3 [(sebuf.http.field_examples) = {values: ["Running", "Failed"]}];
+  optional string deleted_at = 4 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:11:02.660713Z"]}];
+  int32 restart_count = 5 [(sebuf.http.field_examples) = {values: ["0", "7"]}];
+  bool ready = 6 [(sebuf.http.field_examples) = {values: ["true", "false"]}];
+  // The worst category among the sibling's open incidents; absent when
+  // none is open.
+  optional Category worst_open_category = 7;
+}
+
+// IncidentDetail is everything the incident page shows.
+message IncidentDetail {
+  IncidentRow incident = 1;
+  Pod pod = 2;
+  // The subject container, or every container for a pod-level incident.
+  repeated Container containers = 3;
+  reserved 4;
+  repeated Artifact artifacts = 5;
+  repeated K8sEvent events = 6;
+  // The latest condition per type.
+  repeated PodCondition conditions = 7;
+  // The Job this incident is about, or the Job that owns the failing pod;
+  // absent for a pod incident under no Job.
+  JobRow job = 8;
+  // The newest pod the recorder saw for that Job, which may since have been
+  // pruned from the cluster.
+  optional string last_pod_name = 9;
+  // The Explore URL scoped to the subject container, or the whole pod when
+  // there is no subject container; absent when the cluster is unconfigured
+  // or the incident has no pod.
+  optional string grafana_url = 10 [(sebuf.http.field_examples) = {values: ["https://logs.example.grafana.net/explore?schemaVersion=1&panes=..."]}];
+  // The other incidents of the same pod and the same Job, newest activity
+  // first, bounded by the daemon's default page limit.
+  repeated IncidentRow related_incidents = 11;
+}
+
+// IncidentTimelineRequest addresses one incident's timeline.
+message IncidentTimelineRequest {
+  int64 id = 1;
+}
+
+// TimelineEntry is one merged event on an incident's timeline. Which fields
+// are set follows from kind.
+message TimelineEntry {
+  TimelineKind kind = 1;
+  optional string k8s_at = 2 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:11.000000Z"]}];
+  string observed_at = 3 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:11.482913Z"]}];
+  optional string container_name = 4 [(sebuf.http.field_examples) = {values: ["checkout-api"]}];
+  optional ContainerState state = 5;
+  optional string reason = 6 [(sebuf.http.field_examples) = {values: ["Error", "CrashLoopBackOff"]}];
+  optional int32 exit_code = 7 [(sebuf.http.field_examples) = {values: ["137", "1"]}];
+  optional int32 signal = 8 [(sebuf.http.field_examples) = {values: ["9"]}];
+  optional int32 restart_count = 9 [(sebuf.http.field_examples) = {values: ["7", "0"]}];
+  optional bool gap_reconstructed = 10 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+  optional string condition_type = 11 [(sebuf.http.field_examples) = {values: ["Ready", "ContainersReady"]}];
+  optional string condition_status = 12 [(sebuf.http.field_examples) = {values: ["False", "True"]}];
+  optional string message = 13 [(sebuf.http.field_examples) = {values: ["Back-off restarting failed container checkout-api"]}];
+  optional string event_type = 14 [(sebuf.http.field_examples) = {values: ["Warning", "Normal"]}];
+  optional string event_reason = 15 [(sebuf.http.field_examples) = {values: ["BackOff", "Unhealthy"]}];
+  optional int32 count = 16 [(sebuf.http.field_examples) = {values: ["7", "1"]}];
+  optional int64 artifact_id = 17 [(sebuf.http.field_examples) = {values: ["12"]}];
+  optional ArtifactKind artifact_kind = 18;
+  optional CaptureGap capture_gap = 19;
+  optional string replicaset_name = 20 [(sebuf.http.field_examples) = {values: ["checkout-api-7d9f8b6c4"]}];
+  optional string image_tag = 21 [(sebuf.http.field_examples) = {values: ["1.42.0"]}];
+  optional int64 revision = 22 [(sebuf.http.field_examples) = {values: ["8", "7"]}];
+  optional LifecycleStep lifecycle = 23;
+  optional CloseReason close_reason = 24;
+}
+
+// TimelineResponse is one incident's timeline, in merge order.
+message TimelineResponse {
+  repeated TimelineEntry entries = 1;
+  bool truncated = 2 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+}
+
+// StreamIncidentsRequest scopes the incident stream.
+message StreamIncidentsRequest {
+  repeated int64 cluster_ids = 1 [(sebuf.http.query) = {}];
+}
+
+// AcknowledgeIncidentRequest addresses the incident to acknowledge.
+message AcknowledgeIncidentRequest {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["412", "413"]}];
+}
+
+// UnacknowledgeIncidentRequest addresses the incident to clear the
+// acknowledgement of.
+message UnacknowledgeIncidentRequest {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["412", "413"]}];
+}
+
+// ResolveIncidentRequest addresses the incident to close as manual.
+message ResolveIncidentRequest {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["412", "413"]}];
+}
+
+// UnresolveIncidentRequest addresses the incident to reopen a manual close
+// of.
+message UnresolveIncidentRequest {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["412", "413"]}];
+}
+
+// DismissIncidentRequest addresses the incident to dismiss.
+message DismissIncidentRequest {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["412", "413"]}];
+}
+
+// UndismissIncidentRequest addresses the incident to clear the dismissal of.
+message UndismissIncidentRequest {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["412", "413"]}];
+}
+
+// SetIncidentNoteRequest carries the whole note; an empty note clears it.
+message SetIncidentNoteRequest {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["412", "413"]}];
+  string note = 2 [(sebuf.http.field_examples) = {values: ["waiting on the 1.42.1 image"]}];
+}
+
+// DeleteIncidentRequest addresses the incident to delete.
+message DeleteIncidentRequest {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["412", "413"]}];
+}
+
+// DeleteIncidentResponse is empty: the row is gone, there is nothing to
+// return.
+message DeleteIncidentResponse {}

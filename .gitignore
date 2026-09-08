@@ -1,0 +1,26 @@
+# development storage: sqlite, wal, artifacts, local config
+.storage/
+
+# repo-local kubeconfig; holds cluster credentials
+kube/config
+
+# build output
+bin/
+*.test
+*.out
+coverage.*
+
+# macos application build output
+macos/.build/
+macos/DerivedData/
+macos/idios.xcodeproj/project.xcworkspace/
+xcuserdata/
+
+# editors and os
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# agent scratch
+.claude/

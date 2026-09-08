@@ -1,0 +1,5 @@
+{"metadata":{"name":"report-28812345-x9k2p","namespace":"idios-smoke","uid":"pod-oom0","creationTimestamp":"2026-08-27T11:45:00Z","ownerReferences":[{"apiVersion":"batch/v1","kind":"Job","name":"report-28812345","uid":"job-report-1","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Never","containers":[{"name":"report","image":"registry.example.com/report:0.9.1","resources":{"limits":{"memory":"64Mi"}}}]},
+ "status":{"phase":"Failed","qosClass":"Burstable","startTime":"2026-08-27T11:45:05Z",
+  "containerStatuses":[{"name":"report","image":"registry.example.com/report:0.9.1","imageID":"registry.example.com/report@sha256:3333","containerID":"containerd://rrr","ready":false,"restartCount":0,
+   "state":{"terminated":{"exitCode":0,"signal":9,"reason":"OOMKilled","startedAt":"2026-08-27T11:45:08Z","finishedAt":"2026-08-27T11:58:00Z","containerID":"containerd://rrr"}}}]}}

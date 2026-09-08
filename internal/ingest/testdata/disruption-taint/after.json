@@ -1,0 +1,5 @@
+{"metadata":{"name":"web-7d9f8c6b5-drain","namespace":"idios-smoke","uid":"pod-drain","creationTimestamp":"2026-08-27T11:45:00Z","deletionTimestamp":"2026-08-27T11:59:30Z","ownerReferences":[{"apiVersion":"apps/v1","kind":"ReplicaSet","name":"web-7d9f8c6b5","uid":"rs-web-1","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Always","containers":[{"name":"api","image":"registry.example.com/web:1.4.2"}]},
+ "status":{"phase":"Running","qosClass":"BestEffort","startTime":"2026-08-27T11:45:05Z",
+  "conditions":[{"type":"DisruptionTarget","status":"True","reason":"DeletionByTaintManager","message":"Taint manager: deleting due to NoExecute taint","lastTransitionTime":"2026-08-27T11:59:30Z"},{"type":"Ready","status":"True","lastTransitionTime":"2026-08-27T11:45:10Z"}],
+  "containerStatuses":[{"name":"api","image":"registry.example.com/web:1.4.2","imageID":"registry.example.com/web@sha256:1111","containerID":"containerd://ddd","ready":true,"restartCount":0,"state":{"running":{"startedAt":"2026-08-27T11:45:08Z"}}}]}}

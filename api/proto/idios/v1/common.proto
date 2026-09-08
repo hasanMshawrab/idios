@@ -1,0 +1,271 @@
+syntax = "proto3";
+
+package idios.v1;
+
+import "sebuf/http/annotations.proto";
+
+option go_package = "github.com/hasanMshawrab/idios/internal/apigen/idiosv1;idiosv1";
+
+// Category classifies what kind of incident was observed.
+enum Category {
+  CATEGORY_UNSPECIFIED = 0;
+  CATEGORY_OOM = 1 [(sebuf.http.enum_value) = "oom"];
+  CATEGORY_CRASH = 2 [(sebuf.http.enum_value) = "crash"];
+  CATEGORY_IMAGE_PULL = 3 [(sebuf.http.enum_value) = "image_pull"];
+  CATEGORY_CONFIG = 4 [(sebuf.http.enum_value) = "config"];
+  CATEGORY_PROBE = 5 [(sebuf.http.enum_value) = "probe"];
+  CATEGORY_SCHEDULING = 6 [(sebuf.http.enum_value) = "scheduling"];
+  CATEGORY_NODE_PRESSURE = 7 [(sebuf.http.enum_value) = "node_pressure"];
+  CATEGORY_RESCHEDULED = 8 [(sebuf.http.enum_value) = "rescheduled"];
+  CATEGORY_JOB_FAILED = 9 [(sebuf.http.enum_value) = "job_failed"];
+  CATEGORY_OTHER = 10 [(sebuf.http.enum_value) = "other"];
+  CATEGORY_STUCK = 11 [(sebuf.http.enum_value) = "stuck"];
+  CATEGORY_UNCLEAN_EXIT = 12 [(sebuf.http.enum_value) = "unclean_exit"];
+}
+
+// CloseReason records why an incident was closed.
+enum CloseReason {
+  CLOSE_REASON_UNSPECIFIED = 0;
+  CLOSE_REASON_RECOVERED = 1 [(sebuf.http.enum_value) = "recovered"];
+  CLOSE_REASON_POD_DELETED = 2 [(sebuf.http.enum_value) = "pod_deleted"];
+  CLOSE_REASON_JOB_FINISHED = 3 [(sebuf.http.enum_value) = "job_finished"];
+  CLOSE_REASON_MANUAL = 4 [(sebuf.http.enum_value) = "manual"];
+}
+
+// IncidentState is the state derived from the timestamps of an incident row;
+// it is not a stored column.
+enum IncidentState {
+  INCIDENT_STATE_UNSPECIFIED = 0;
+  INCIDENT_STATE_OPEN = 1 [(sebuf.http.enum_value) = "open"];
+  INCIDENT_STATE_ACKNOWLEDGED = 2 [(sebuf.http.enum_value) = "acknowledged"];
+  INCIDENT_STATE_RECOVERED = 3 [(sebuf.http.enum_value) = "recovered"];
+  INCIDENT_STATE_POD_DELETED = 4 [(sebuf.http.enum_value) = "pod_deleted"];
+  INCIDENT_STATE_JOB_FINISHED = 5 [(sebuf.http.enum_value) = "job_finished"];
+  INCIDENT_STATE_MANUAL = 6 [(sebuf.http.enum_value) = "manual"];
+  INCIDENT_STATE_DISMISSED = 7 [(sebuf.http.enum_value) = "dismissed"];
+  // A filter and a count value, never a row's own state: open, or closed
+  // within the attention window and never acknowledged or dismissed.
+  INCIDENT_STATE_ATTENTION = 8 [(sebuf.http.enum_value) = "attention"];
+}
+
+// CaptureGap explains why an artifact holds no file.
+enum CaptureGap {
+  CAPTURE_GAP_UNSPECIFIED = 0;
+  CAPTURE_GAP_POD_DELETED = 1 [(sebuf.http.enum_value) = "pod_deleted"];
+  CAPTURE_GAP_NO_PREVIOUS_RUN = 2 [(sebuf.http.enum_value) = "no_previous_run"];
+  CAPTURE_GAP_FORBIDDEN = 3 [(sebuf.http.enum_value) = "forbidden"];
+  CAPTURE_GAP_NO_OUTPUT = 4 [(sebuf.http.enum_value) = "no_output"];
+  CAPTURE_GAP_KUBELET_ERROR = 5 [(sebuf.http.enum_value) = "kubelet_error"];
+  CAPTURE_GAP_UNKNOWN = 6 [(sebuf.http.enum_value) = "unknown"];
+  CAPTURE_GAP_UNOBSERVABLE = 7 [(sebuf.http.enum_value) = "unobservable"];
+}
+
+// DeletionSource records which path observed a pod's removal.
+enum DeletionSource {
+  DELETION_SOURCE_UNSPECIFIED = 0;
+  DELETION_SOURCE_WATCH = 1 [(sebuf.http.enum_value) = "watch"];
+  DELETION_SOURCE_RECONCILE = 2 [(sebuf.http.enum_value) = "reconcile"];
+  DELETION_SOURCE_UNWATCHED = 3 [(sebuf.http.enum_value) = "unwatched"];
+}
+
+// DeletionReason is the inferred reason a pod was removed.
+enum DeletionReason {
+  DELETION_REASON_UNSPECIFIED = 0;
+  DELETION_REASON_ROLLOUT = 1 [(sebuf.http.enum_value) = "rollout"];
+  DELETION_REASON_REPLACED = 2 [(sebuf.http.enum_value) = "replaced"];
+  DELETION_REASON_SCALED_DOWN = 3 [(sebuf.http.enum_value) = "scaled_down"];
+  DELETION_REASON_JOB_PRUNED = 4 [(sebuf.http.enum_value) = "job_pruned"];
+  DELETION_REASON_UNKNOWN = 5 [(sebuf.http.enum_value) = "unknown"];
+  DELETION_REASON_EVICTED = 6 [(sebuf.http.enum_value) = "evicted"];
+}
+
+// ContainerKind is a container's role within a pod spec; it decides what
+// ready means for the container.
+enum ContainerKind {
+  CONTAINER_KIND_UNSPECIFIED = 0;
+  CONTAINER_KIND_INIT = 1 [(sebuf.http.enum_value) = "init"];
+  CONTAINER_KIND_SIDECAR = 2 [(sebuf.http.enum_value) = "sidecar"];
+  CONTAINER_KIND_APP = 3 [(sebuf.http.enum_value) = "app"];
+  CONTAINER_KIND_EPHEMERAL = 4 [(sebuf.http.enum_value) = "ephemeral"];
+}
+
+// ContainerState is a container's lifecycle state.
+enum ContainerState {
+  CONTAINER_STATE_UNSPECIFIED = 0;
+  CONTAINER_STATE_WAITING = 1 [(sebuf.http.enum_value) = "waiting"];
+  CONTAINER_STATE_RUNNING = 2 [(sebuf.http.enum_value) = "running"];
+  CONTAINER_STATE_TERMINATED = 3 [(sebuf.http.enum_value) = "terminated"];
+}
+
+// ArtifactKind says what an artifact file captured.
+enum ArtifactKind {
+  ARTIFACT_KIND_UNSPECIFIED = 0;
+  ARTIFACT_KIND_LOG_PREVIOUS = 1 [(sebuf.http.enum_value) = "log_previous"];
+  ARTIFACT_KIND_LOG_CURRENT = 2 [(sebuf.http.enum_value) = "log_current"];
+  ARTIFACT_KIND_POD_JSON = 3 [(sebuf.http.enum_value) = "pod_json"];
+}
+
+// SubjectKind distinguishes which kind of workload an incident is about.
+enum SubjectKind {
+  SUBJECT_KIND_UNSPECIFIED = 0;
+  SUBJECT_KIND_POD = 1 [(sebuf.http.enum_value) = "pod"];
+  SUBJECT_KIND_JOB = 2 [(sebuf.http.enum_value) = "job"];
+}
+
+// TimelineKind says which source a timeline entry came from; the order of
+// the values is the tie-break order when two entries share a time.
+enum TimelineKind {
+  TIMELINE_KIND_UNSPECIFIED = 0;
+  TIMELINE_KIND_CONTAINER_TRANSITION = 1 [(sebuf.http.enum_value) = "container_transition"];
+  TIMELINE_KIND_CONDITION = 2 [(sebuf.http.enum_value) = "condition"];
+  TIMELINE_KIND_EVENT = 3 [(sebuf.http.enum_value) = "event"];
+  TIMELINE_KIND_CAPTURE = 4 [(sebuf.http.enum_value) = "capture"];
+  TIMELINE_KIND_ROLLOUT = 5 [(sebuf.http.enum_value) = "rollout"];
+  TIMELINE_KIND_LIFECYCLE = 6 [(sebuf.http.enum_value) = "lifecycle"];
+  TIMELINE_KIND_CUT = 7 [(sebuf.http.enum_value) = "cut"];
+}
+
+// LifecycleStep is which end of an incident's life a lifecycle entry marks.
+enum LifecycleStep {
+  LIFECYCLE_STEP_UNSPECIFIED = 0;
+  LIFECYCLE_STEP_OPENED = 1 [(sebuf.http.enum_value) = "opened"];
+  LIFECYCLE_STEP_CLOSED = 2 [(sebuf.http.enum_value) = "closed"];
+}
+
+// StateCount is one incident state and how many incidents hold it.
+message StateCount {
+  IncidentState state = 1;
+  int32 count = 2 [(sebuf.http.field_examples) = {values: ["4", "1", "17"]}];
+}
+
+// CategoryCount is one category and how many incidents hold it.
+message CategoryCount {
+  Category category = 1;
+  int32 count = 2 [(sebuf.http.field_examples) = {values: ["3", "1", "9"]}];
+}
+
+// TagCount is one image tag and how many times it was seen.
+message TagCount {
+  string tag = 1 [(sebuf.http.field_examples) = {values: ["1.42.0", "1.41.3", ""]}];
+  int32 count = 2 [(sebuf.http.field_examples) = {values: ["6", "2", "1"]}];
+}
+
+// Pod is a row of the pods table.
+message Pod {
+  string uid = 1 [(sebuf.http.field_examples) = {values: ["8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70"]}];
+  int64 cluster_id = 2 [(sebuf.http.field_examples) = {values: ["1", "2"]}];
+  string namespace = 3 [(sebuf.http.field_examples) = {values: ["shop", "payments"]}];
+  string name = 4 [(sebuf.http.field_examples) = {values: ["checkout-api-7d9f8b6c4-x2kqp"]}];
+  optional string node_name = 5 [(sebuf.http.field_examples) = {values: ["orbstack"]}];
+  string phase = 6 [(sebuf.http.field_examples) = {values: ["Running", "Pending", "Failed"]}];
+  optional string status_reason = 7 [(sebuf.http.field_examples) = {values: ["Unschedulable"]}];
+  optional string status_message = 8 [(sebuf.http.field_examples) = {values: ["0/1 nodes are available: 1 Insufficient cpu."]}];
+  optional string deletion_requested_at = 9 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:07:52.104881Z"]}];
+  optional string qos_class = 10 [(sebuf.http.field_examples) = {values: ["Burstable", "Guaranteed"]}];
+  string controller_kind = 11 [(sebuf.http.field_examples) = {values: ["ReplicaSet", "Job"]}];
+  string controller_name = 12 [(sebuf.http.field_examples) = {values: ["checkout-api-7d9f8b6c4"]}];
+  string controller_uid = 13 [(sebuf.http.field_examples) = {values: ["3c1d0b2a-77aa-4f31-9b02-5d6e7f801122"]}];
+  string workload_kind = 14 [(sebuf.http.field_examples) = {values: ["Deployment", "Job", "StatefulSet"]}];
+  string workload_name = 15 [(sebuf.http.field_examples) = {values: ["checkout-api"]}];
+  string created_at = 16 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:02:58.000000Z"]}];
+  optional string started_at = 17 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:04.000000Z"]}];
+  string first_seen_at = 18 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:11.482913Z"]}];
+  string last_seen_at = 19 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:09:41.115204Z"]}];
+  optional string deleted_at = 20 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:11:02.660713Z"]}];
+  optional DeletionSource deletion_source = 21;
+  optional DeletionReason deletion_reason = 22;
+}
+
+// Container is a row of the containers table: the latest snapshot of one
+// container of a pod.
+message Container {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["412", "413"]}];
+  string pod_uid = 2 [(sebuf.http.field_examples) = {values: ["8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70"]}];
+  string name = 3 [(sebuf.http.field_examples) = {values: ["checkout-api", "envoy"]}];
+  ContainerKind kind = 4;
+  string image = 5 [(sebuf.http.field_examples) = {values: ["registry.example.com/checkout-api:1.42.0"]}];
+  optional string image_tag = 6 [(sebuf.http.field_examples) = {values: ["1.42.0"]}];
+  optional string image_id = 7 [(sebuf.http.field_examples) = {values: ["registry.example.com/checkout-api@sha256:9f2e5c0a1b7d4e6f8a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f"]}];
+  optional string container_id = 8 [(sebuf.http.field_examples) = {values: ["containerd://5b1a9c0d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b"]}];
+  optional string cpu_request = 9 [(sebuf.http.field_examples) = {values: ["100m", "1"]}];
+  optional string cpu_limit = 10 [(sebuf.http.field_examples) = {values: ["500m", "2"]}];
+  optional string mem_request = 11 [(sebuf.http.field_examples) = {values: ["128Mi"]}];
+  optional string mem_limit = 12 [(sebuf.http.field_examples) = {values: ["256Mi"]}];
+  optional int64 cpu_request_millis = 13 [(sebuf.http.field_examples) = {values: ["100", "1000"]}];
+  optional int64 cpu_limit_millis = 14 [(sebuf.http.field_examples) = {values: ["500", "2000"]}];
+  optional int64 mem_request_bytes = 15 [(sebuf.http.field_examples) = {values: ["134217728"]}];
+  optional int64 mem_limit_bytes = 16 [(sebuf.http.field_examples) = {values: ["268435456"]}];
+  ContainerState state = 17;
+  optional string reason = 18 [(sebuf.http.field_examples) = {values: ["CrashLoopBackOff", "OOMKilled", "ImagePullBackOff"]}];
+  optional int32 exit_code = 19 [(sebuf.http.field_examples) = {values: ["137", "1", "0"]}];
+  optional int32 signal = 20 [(sebuf.http.field_examples) = {values: ["9", "15"]}];
+  bool ready = 21 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+  int32 restart_count = 22 [(sebuf.http.field_examples) = {values: ["7", "0", "3"]}];
+  optional string running_since = 23 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:04.000000Z"]}];
+  optional string last_terminated_reason = 24 [(sebuf.http.field_examples) = {values: ["Error", "OOMKilled"]}];
+  optional int32 last_terminated_exit_code = 25 [(sebuf.http.field_examples) = {values: ["137", "1"]}];
+  optional int32 last_terminated_signal = 26 [(sebuf.http.field_examples) = {values: ["9"]}];
+  optional string last_terminated_at = 27 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:11.000000Z"]}];
+  string updated_at = 28 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:09:41.115204Z"]}];
+  // The Explore URL scoped to this container's own run; absent when the
+  // cluster is unconfigured for Grafana.
+  optional string grafana_url = 29 [(sebuf.http.field_examples) = {values: ["https://logs.example.grafana.net/explore?schemaVersion=1&panes=..."]}];
+}
+
+// PodCondition is a row of the pod_condition_history table.
+message PodCondition {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["88", "89"]}];
+  string pod_uid = 2 [(sebuf.http.field_examples) = {values: ["8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70"]}];
+  string type = 3 [(sebuf.http.field_examples) = {values: ["Ready", "ContainersReady", "PodScheduled"]}];
+  string status = 4 [(sebuf.http.field_examples) = {values: ["False", "True", "Unknown"]}];
+  string reason = 5 [(sebuf.http.field_examples) = {values: ["ContainersNotReady", ""]}];
+  optional string message = 6 [(sebuf.http.field_examples) = {values: ["containers with unready status: [checkout-api]"]}];
+  optional string k8s_transition_at = 7 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:11.000000Z"]}];
+  string observed_at = 8 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:11.482913Z"]}];
+}
+
+// K8sEvent is a row of the k8s_events table. The stored raw_json is not on
+// the wire: it is a duplicate of the columns beside it.
+message K8sEvent {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["1204", "1205"]}];
+  int64 cluster_id = 2 [(sebuf.http.field_examples) = {values: ["1", "2"]}];
+  string event_uid = 3 [(sebuf.http.field_examples) = {values: ["b2f7c9d1-3e4a-4b5c-8d9e-0f1a2b3c4d5e"]}];
+  string namespace = 4 [(sebuf.http.field_examples) = {values: ["shop", "payments"]}];
+  string type = 5 [(sebuf.http.field_examples) = {values: ["Warning", "Normal"]}];
+  string involved_kind = 6 [(sebuf.http.field_examples) = {values: ["Pod", "Job"]}];
+  string involved_name = 7 [(sebuf.http.field_examples) = {values: ["checkout-api-7d9f8b6c4-x2kqp"]}];
+  string involved_uid = 8 [(sebuf.http.field_examples) = {values: ["8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70"]}];
+  string field_path = 9 [(sebuf.http.field_examples) = {values: ["spec.containers{checkout-api}", ""]}];
+  string reason = 10 [(sebuf.http.field_examples) = {values: ["BackOff", "Failed", "Unhealthy"]}];
+  string message = 11 [(sebuf.http.field_examples) = {values: ["Back-off restarting failed container checkout-api in pod checkout-api-7d9f8b6c4-x2kqp"]}];
+  string source_component = 12 [(sebuf.http.field_examples) = {values: ["kubelet", "default-scheduler"]}];
+  int32 count = 13 [(sebuf.http.field_examples) = {values: ["7", "1"]}];
+  string first_ts = 14 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:11.000000Z"]}];
+  string last_ts = 15 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:09:38.000000Z"]}];
+  optional Category category = 16;
+  optional int64 incident_id = 17 [(sebuf.http.field_examples) = {values: ["412"]}];
+}
+
+// ContainerStateHistory is a row of the container_state_history table: one
+// observed container transition.
+message ContainerStateHistory {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["3301", "3302"]}];
+  string pod_uid = 2 [(sebuf.http.field_examples) = {values: ["8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70"]}];
+  string container_name = 3 [(sebuf.http.field_examples) = {values: ["checkout-api", "envoy"]}];
+  optional int64 incident_id = 4 [(sebuf.http.field_examples) = {values: ["412"]}];
+  string image = 5 [(sebuf.http.field_examples) = {values: ["registry.example.com/checkout-api:1.42.0"]}];
+  optional string image_id = 6 [(sebuf.http.field_examples) = {values: ["registry.example.com/checkout-api@sha256:9f2e5c0a1b7d4e6f8a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f"]}];
+  optional string container_id = 7 [(sebuf.http.field_examples) = {values: ["containerd://5b1a9c0d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b"]}];
+  ContainerState state = 8;
+  optional string reason = 9 [(sebuf.http.field_examples) = {values: ["Error", "OOMKilled", "CrashLoopBackOff"]}];
+  optional int32 exit_code = 10 [(sebuf.http.field_examples) = {values: ["137", "1"]}];
+  optional int32 signal = 11 [(sebuf.http.field_examples) = {values: ["9"]}];
+  int32 restart_count = 12 [(sebuf.http.field_examples) = {values: ["7", "0"]}];
+  optional Category category = 13;
+  optional string k8s_started_at = 14 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:04.000000Z"]}];
+  optional string k8s_finished_at = 15 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:11.000000Z"]}];
+  string observed_at = 16 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:11.482913Z"]}];
+  // True when the row was inferred from a restart_count jump rather than
+  // seen; the application draws it hollow.
+  bool gap_reconstructed = 17 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+}

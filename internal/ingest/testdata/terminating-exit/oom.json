@@ -1,0 +1,5 @@
+{"metadata":{"name":"web-7d9f8c6b5-term1","namespace":"idios-smoke","uid":"pod-term","creationTimestamp":"2026-08-27T11:45:00Z","deletionTimestamp":"2026-08-27T11:59:20Z","ownerReferences":[{"apiVersion":"apps/v1","kind":"ReplicaSet","name":"web-7d9f8c6b5","uid":"rs-web-1","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Always","terminationGracePeriodSeconds":20,"containers":[{"name":"api","image":"registry.example.com/web:1.4.2"}]},
+ "status":{"phase":"Running","qosClass":"BestEffort","startTime":"2026-08-27T11:45:05Z",
+  "conditions":[{"type":"Ready","status":"False","reason":"ContainersNotReady","message":"containers with unready status: [api]","lastTransitionTime":"2026-08-27T11:59:22Z"}],
+  "containerStatuses":[{"name":"api","image":"registry.example.com/web:1.4.2","imageID":"registry.example.com/web@sha256:1111","containerID":"containerd://ttt","ready":false,"restartCount":0,"state":{"terminated":{"reason":"OOMKilled","exitCode":137,"signal":9,"containerID":"containerd://ttt","startedAt":"2026-08-27T11:45:08Z","finishedAt":"2026-08-27T11:59:40Z"}}}]}}

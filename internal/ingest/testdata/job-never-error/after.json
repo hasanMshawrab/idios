@@ -1,0 +1,5 @@
+{"metadata":{"name":"import-28812346-b7c3d","namespace":"idios-smoke","uid":"pod-jobfail","creationTimestamp":"2026-08-27T11:45:00Z","ownerReferences":[{"apiVersion":"batch/v1","kind":"Job","name":"import-28812346","uid":"job-import-1","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Never","containers":[{"name":"worker","image":"registry.example.com/import:5.2.0"}]},
+ "status":{"phase":"Failed","qosClass":"Burstable","startTime":"2026-08-27T11:45:05Z",
+  "containerStatuses":[{"name":"worker","image":"registry.example.com/import:5.2.0","imageID":"registry.example.com/import@sha256:8888","containerID":"containerd://jjj","ready":false,"restartCount":0,
+   "state":{"terminated":{"exitCode":1,"reason":"Error","startedAt":"2026-08-27T11:45:08Z","finishedAt":"2026-08-27T11:50:00Z","containerID":"containerd://jjj"}}}]}}

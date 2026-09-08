@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: smoke-cronjob-retry
+  labels:
+    idios-smoke: "true"
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        idios-smoke: "true"
+    spec:
+      restartPolicy: Never
+      volumes:
+      - name: marker
+        hostPath:
+          path: /tmp/idios-smoke-cronjob-retry
+          type: DirectoryOrCreate
+      containers:
+      - name: app
+        image: busybox:1.36
+        env:
+        - name: JOB_UID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['batch.kubernetes.io/controller-uid']
+        volumeMounts:
+        - name: marker
+          mountPath: /marker
+        # The marker is keyed on the job uid, not the job name, because the
+        # node's /tmp outlives a smoke run: a marker left by an earlier
+        # run's job must never make a later first attempt succeed.
+        command: ["sh", "-c", "if [ -f \"/marker/$JOB_UID\" ]; then echo retry succeeding; exit 0; fi; echo first attempt failing; touch \"/marker/$JOB_UID\"; exit 1"]

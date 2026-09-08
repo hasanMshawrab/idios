@@ -1,0 +1,38 @@
+# Reproduces a container that ignores SIGTERM: PID 1 traps TERM so the
+# kubelet's grace-period kill (SIGKILL) is the only thing that ends it.
+# Readiness fails once the preStop hook removes the ready file, which
+# should record an unclean_exit closed pod_deleted and never a probe
+# incident, since the miss happens on a container already terminating.
+# On a single node the kubelet's final status write can lose the race to
+# the pod object's removal, in which case no termination is observed and
+# the query below comes back empty; that is the race the early-capture
+# cache exists for, not a failure of this fixture.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: smoke-graceful
+  labels:
+    idios-smoke: "true"
+spec:
+  restartPolicy: Always
+  terminationGracePeriodSeconds: 20
+  containers:
+  - name: app
+    image: busybox:1.36
+    command: ["sh", "-c", "trap \"\" TERM; echo serving, ignoring SIGTERM; touch /tmp/ready; while :; do sleep 1; done"]
+    readinessProbe:
+      exec:
+        command: ["cat", "/tmp/ready"]
+      periodSeconds: 2
+      failureThreshold: 1
+    lifecycle:
+      preStop:
+        exec:
+          command: ["rm", "/tmp/ready"]
+    resources:
+      limits:
+        cpu: 50m
+        memory: 16Mi
+      requests:
+        cpu: 10m
+        memory: 16Mi

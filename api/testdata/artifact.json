@@ -1,0 +1,1 @@
+{"captureGap":"kubelet_error","captureNote":"the container is not available","capturedAt":"2026-08-27T14:38:05.000000Z","capturedEarly":true,"containerName":"api","filePath":"prod/pod-crash/api-6.log","id":"81","incidentId":"412","kind":"log_previous","podUid":"pod-crash","restartCount":6,"sizeBytes":"262144","truncated":true}

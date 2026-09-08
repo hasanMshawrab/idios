@@ -1,0 +1,4 @@
+{"metadata":{"name":"web-5b8c7-cfg01","namespace":"idios-smoke","uid":"pod-cfg","creationTimestamp":"2026-08-27T11:45:00Z","ownerReferences":[{"apiVersion":"apps/v1","kind":"ReplicaSet","name":"web-5b8c7","uid":"rs-web-3","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Always","containers":[{"name":"api","image":"registry.example.com/web:1.4.2"}]},
+ "status":{"phase":"Pending","qosClass":"BestEffort","startTime":"2026-08-27T11:45:05Z",
+  "containerStatuses":[{"name":"api","image":"registry.example.com/web:1.4.2","imageID":"","ready":false,"restartCount":0,"state":{"waiting":{"reason":"CreateContainerConfigError","message":"configmap \"web-settings\" not found"}}}]}}

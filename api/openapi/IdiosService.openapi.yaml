@@ -1,0 +1,4384 @@
+openapi: 3.1.0
+info:
+    title: IdiosService API
+    version: 1.0.0
+paths:
+    /v1/clusters:
+        get:
+            tags:
+                - IdiosService
+            summary: ListClusters
+            operationId: ListClusters
+            parameters:
+                - name: cluster_ids
+                  in: query
+                  required: false
+                  style: form
+                  explode: true
+                  schema:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ClustersResponse'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+        post:
+            tags:
+                - IdiosService
+            summary: AddCluster
+            operationId: AddCluster
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AddClusterRequest'
+                required: true
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Cluster'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/kube/contexts:
+        get:
+            tags:
+                - IdiosService
+            summary: ListKubeContexts
+            operationId: ListKubeContexts
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/KubeContextsResponse'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/kube/contexts/{context}/namespaces:
+        get:
+            tags:
+                - IdiosService
+            summary: ListKubeNamespaces
+            description: The only read that talks to a cluster, used by the add-cluster flow.
+            operationId: ListKubeNamespaces
+            parameters:
+                - name: context
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/KubeNamespacesResponse'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/incidents:
+        get:
+            tags:
+                - IdiosService
+            summary: ListIncidents
+            operationId: ListIncidents
+            parameters:
+                - name: cluster_ids
+                  in: query
+                  required: false
+                  style: form
+                  explode: true
+                  schema:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+                - name: state
+                  in: query
+                  description: |-
+                    One of open, acknowledged, recovered, pod_deleted, job_finished, manual,
+                     dismissed, attention.
+                  required: false
+                  schema:
+                    type: string
+                - name: category
+                  in: query
+                  description: |-
+                    One of the Category values as stored: oom, crash, unclean_exit,
+                     image_pull, config, probe, scheduling, node_pressure, rescheduled,
+                     job_failed, stuck, other.
+                  required: false
+                  schema:
+                    type: string
+                - name: namespace
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: workload_kind
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: workload_name
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: pod_uid
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: job_uid
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: Zero means the daemon's configured default.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: node_name
+                  in: query
+                  description: |-
+                    Only the incidents opened on this node; a pod that had no node when its
+                     incident opened matches nothing.
+                  required: false
+                  schema:
+                    type: string
+                - name: pod_name
+                  in: query
+                  description: |-
+                    pod_name is an exact match on the pod's name, so a client holding a
+                     name from a truncated list still reaches its rows.
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IncidentsResponse'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/incidents/counts:
+        get:
+            tags:
+                - IdiosService
+            summary: GetIncidentCounts
+            operationId: GetIncidentCounts
+            parameters:
+                - name: cluster_ids
+                  in: query
+                  required: false
+                  style: form
+                  explode: true
+                  schema:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+                - name: state
+                  in: query
+                  description: |-
+                    One of open, acknowledged, recovered, pod_deleted, job_finished, manual,
+                     dismissed, attention.
+                  required: false
+                  schema:
+                    type: string
+                - name: category
+                  in: query
+                  description: |-
+                    One of the Category values as stored: oom, crash, unclean_exit,
+                     image_pull, config, probe, scheduling, node_pressure, rescheduled,
+                     job_failed, stuck, other.
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IncidentCounts'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/incidents/{id}:
+        get:
+            tags:
+                - IdiosService
+            summary: GetIncident
+            operationId: GetIncident
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IncidentDetail'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+        delete:
+            tags:
+                - IdiosService
+            summary: DeleteIncident
+            operationId: DeleteIncident
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteIncidentResponse'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/incidents/{id}/timeline:
+        get:
+            tags:
+                - IdiosService
+            summary: IncidentTimeline
+            operationId: IncidentTimeline
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TimelineResponse'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/incidents/stream:
+        get:
+            tags:
+                - IdiosService
+            summary: StreamIncidents
+            operationId: StreamIncidents
+            parameters:
+                - name: cluster_ids
+                  in: query
+                  required: false
+                  style: form
+                  explode: true
+                  schema:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+            responses:
+                "200":
+                    description: Server-Sent Events stream
+                    content:
+                        text/event-stream:
+                            schema:
+                                type: string
+                                description: SSE stream. Each event contains a JSON-encoded IncidentRow in the data field.
+                    x-sse-event-schema:
+                        $ref: '#/components/schemas/IncidentRow'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/clusters/stream:
+        get:
+            tags:
+                - IdiosService
+            summary: StreamClusters
+            operationId: StreamClusters
+            parameters:
+                - name: cluster_ids
+                  in: query
+                  required: false
+                  style: form
+                  explode: true
+                  schema:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+            responses:
+                "200":
+                    description: Server-Sent Events stream
+                    content:
+                        text/event-stream:
+                            schema:
+                                type: string
+                                description: SSE stream. Each event contains a JSON-encoded Cluster in the data field.
+                    x-sse-event-schema:
+                        $ref: '#/components/schemas/Cluster'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/pods:
+        get:
+            tags:
+                - IdiosService
+            summary: ListPods
+            operationId: ListPods
+            parameters:
+                - name: cluster_ids
+                  in: query
+                  required: false
+                  style: form
+                  explode: true
+                  schema:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+                - name: namespace
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: workload_kind
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: workload_name
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: live
+                  in: query
+                  description: '"true" for live pods, "false" for deleted ones, absent for both.'
+                  required: false
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: Zero means the daemon's configured default.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pod_name
+                  in: query
+                  description: |-
+                    pod_name is an exact match on name, so a client holding a name from a
+                     truncated list still reaches its row.
+                  required: false
+                  schema:
+                    type: string
+                - name: job_uid
+                  in: query
+                  description: |-
+                    job_uid is the controller uid of the Job that owns the pod, so a run can
+                     list every attempt it made and not only the ones that failed.
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PodsResponse'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/pods/{uid}:
+        get:
+            tags:
+                - IdiosService
+            summary: GetPod
+            operationId: GetPod
+            parameters:
+                - name: uid
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PodDetail'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/pods/{uid}/events:
+        get:
+            tags:
+                - IdiosService
+            summary: PodEvents
+            operationId: PodEvents
+            parameters:
+                - name: uid
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: Zero means the daemon's configured default.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/EventsResponse'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/pods/{uid}/history:
+        get:
+            tags:
+                - IdiosService
+            summary: PodHistory
+            operationId: PodHistory
+            parameters:
+                - name: uid
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HistoryResponse'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/artifacts/{id}:
+        get:
+            tags:
+                - IdiosService
+            summary: GetArtifact
+            operationId: GetArtifact
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Artifact'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/workloads:
+        get:
+            tags:
+                - IdiosService
+            summary: ListWorkloads
+            operationId: ListWorkloads
+            parameters:
+                - name: cluster_ids
+                  in: query
+                  required: false
+                  style: form
+                  explode: true
+                  schema:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+                - name: namespace
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: Zero means the daemon's configured default.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/WorkloadsResponse'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/workloads/{cluster_id}/{namespace}/{kind}/{name}:
+        get:
+            tags:
+                - IdiosService
+            summary: GetWorkload
+            description: |-
+                name is required: a pod without a controller belongs to workload kind
+                 none with an empty name, and that workload has no detail. A client
+                 shows it from the list row and from ListPods filtered by
+                 workload_kind=none.
+            operationId: GetWorkload
+            parameters:
+                - name: cluster_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+                - name: namespace
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: kind
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: name
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: pods_live
+                  in: query
+                  description: '"true" for live pods, "false" for deleted ones, absent for both.'
+                  required: false
+                  schema:
+                    type: string
+                - name: pods_limit
+                  in: query
+                  description: Zero means the daemon's configured default.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/WorkloadDetail'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/jobs:
+        get:
+            tags:
+                - IdiosService
+            summary: ListJobs
+            operationId: ListJobs
+            parameters:
+                - name: cluster_ids
+                  in: query
+                  required: false
+                  style: form
+                  explode: true
+                  schema:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+                - name: namespace
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: cronjob_uid
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: Zero means the daemon's configured default.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: cronjob_name
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: live
+                  in: query
+                  description: |-
+                    "true" for runs still in the cluster, "false" for deleted ones, absent
+                     for both.
+                  required: false
+                  schema:
+                    type: string
+                - name: failed
+                  in: query
+                  description: '"true" for runs whose condition is Failed, absent for every run.'
+                  required: false
+                  schema:
+                    type: string
+                - name: job_uid
+                  in: query
+                  description: |-
+                    job_uid names one run exactly; a run page is keyed by it and no
+                     other filter can reach a Job whose incidents were all swept.
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/JobsResponse'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/status:
+        get:
+            tags:
+                - IdiosService
+            summary: GetStatus
+            operationId: GetStatus
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/incidents/{id}/acknowledge:
+        post:
+            tags:
+                - IdiosService
+            summary: AcknowledgeIncident
+            operationId: AcknowledgeIncident
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AcknowledgeIncidentRequest'
+                required: true
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IncidentRow'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+        delete:
+            tags:
+                - IdiosService
+            summary: UnacknowledgeIncident
+            operationId: UnacknowledgeIncident
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IncidentRow'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/incidents/{id}/resolve:
+        post:
+            tags:
+                - IdiosService
+            summary: ResolveIncident
+            operationId: ResolveIncident
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ResolveIncidentRequest'
+                required: true
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IncidentRow'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+        delete:
+            tags:
+                - IdiosService
+            summary: UnresolveIncident
+            operationId: UnresolveIncident
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IncidentRow'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/incidents/{id}/dismiss:
+        post:
+            tags:
+                - IdiosService
+            summary: DismissIncident
+            operationId: DismissIncident
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/DismissIncidentRequest'
+                required: true
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IncidentRow'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+        delete:
+            tags:
+                - IdiosService
+            summary: UndismissIncident
+            operationId: UndismissIncident
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IncidentRow'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/incidents/{id}/note:
+        put:
+            tags:
+                - IdiosService
+            summary: SetIncidentNote
+            operationId: SetIncidentNote
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SetIncidentNoteRequest'
+                required: true
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IncidentRow'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/clusters/{id}:
+        delete:
+            tags:
+                - IdiosService
+            summary: DeleteCluster
+            operationId: DeleteCluster
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteClusterResponse'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+        patch:
+            tags:
+                - IdiosService
+            summary: RenameCluster
+            operationId: RenameCluster
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RenameClusterRequest'
+                required: true
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Cluster'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/clusters/{id}/grafana:
+        patch:
+            tags:
+                - IdiosService
+            summary: SetClusterGrafana
+            operationId: SetClusterGrafana
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SetClusterGrafanaRequest'
+                required: true
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Cluster'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/clusters/{id}/namespaces:
+        post:
+            tags:
+                - IdiosService
+            summary: AddWatchedNamespace
+            operationId: AddWatchedNamespace
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AddWatchedNamespaceRequest'
+                required: true
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Cluster'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /v1/clusters/{id}/namespaces/{name}:
+        delete:
+            tags:
+                - IdiosService
+            summary: RemoveWatchedNamespace
+            operationId: RemoveWatchedNamespace
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+                - name: name
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Cluster'
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationError'
+                default:
+                    description: Error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+components:
+    schemas:
+        Error:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: Error message (e.g., 'user not found', 'database connection failed')
+            description: Error is returned when a handler encounters an error. It contains a simple error message that the developer can customize.
+        FieldViolation:
+            type: object
+            properties:
+                field:
+                    type: string
+                    description: The field path that failed validation (e.g., 'user.email' for nested fields). For header validation, this will be the header name (e.g., 'X-API-Key')
+                description:
+                    type: string
+                    description: Human-readable description of the validation violation (e.g., 'must be a valid email address', 'required field missing')
+            required:
+                - field
+                - description
+            description: FieldViolation describes a single validation error for a specific field.
+        ValidationError:
+            type: object
+            properties:
+                violations:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/FieldViolation'
+                    description: List of validation violations
+            required:
+                - violations
+            description: ValidationError is returned when request validation fails. It contains a list of field violations describing what went wrong.
+        ListClustersRequest:
+            type: object
+            properties:
+                clusterIds:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+            description: ListClustersRequest scopes the cluster list.
+        ClustersResponse:
+            type: object
+            properties:
+                clusters:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Cluster'
+                truncated:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    example: false
+            description: ClustersResponse is the cluster list.
+        Cluster:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "1"
+                        - "2"
+                    format: int64
+                    example: "1"
+                identity:
+                    type: string
+                    examples:
+                        - 6f1c8e2a-4b3d-4c5e-9f80-1a2b3c4d5e6f
+                    example: 6f1c8e2a-4b3d-4c5e-9f80-1a2b3c4d5e6f
+                name:
+                    type: string
+                    examples:
+                        - prod
+                        - staging
+                    example: prod
+                contextName:
+                    type: string
+                    examples:
+                        - orbstack
+                        - prod-eu
+                    example: orbstack
+                apiServerUrl:
+                    type: string
+                    examples:
+                        - https://127.0.0.1:26443
+                    example: https://127.0.0.1:26443
+                firstSeenAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T13:58:02.110394Z"
+                    example: "2026-08-27T13:58:02.110394Z"
+                lastConnectedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:09:41.115204Z"
+                    example: "2026-08-27T14:09:41.115204Z"
+                lastError:
+                    type: string
+                    examples:
+                        - 'dial tcp 127.0.0.1:26443: connect: connection refused'
+                    example: 'dial tcp 127.0.0.1:26443: connect: connection refused'
+                lastErrorAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:10:12.004881Z"
+                    example: "2026-08-27T14:10:12.004881Z"
+                namespaces:
+                    type: array
+                    items:
+                        type: string
+                        examples:
+                            - shop
+                            - payments
+                        example: shop
+                ready:
+                    type: boolean
+                    examples:
+                        - true
+                        - false
+                    example: true
+                lastEventAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:09:41.115204Z"
+                    example: "2026-08-27T14:09:41.115204Z"
+                skewSeconds:
+                    type: number
+                    examples:
+                        - 0.184
+                        - -1.2
+                    format: double
+                    example: 0.184
+                grafanaUrl:
+                    type: string
+                    examples:
+                        - https://logs.example.grafana.net
+                    example: https://logs.example.grafana.net
+                lokiDatasourceUid:
+                    type: string
+                    examples:
+                        - grafanacloud-logs
+                    example: grafanacloud-logs
+                logSelector:
+                    type: string
+                    examples:
+                        - '{namespace="$namespace", pod="$pod", container="$container"}'
+                    example: '{namespace="$namespace", pod="$pod", container="$container"}'
+            description: |-
+                Cluster is a clusters row with its watched namespaces and the state only
+                 the running process knows.
+        ListKubeContextsRequest:
+            type: object
+            description: |-
+                ListKubeContextsRequest takes no parameters; the kubeconfig is the
+                 daemon's.
+        KubeContextsResponse:
+            type: object
+            properties:
+                contexts:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/KubeContext'
+                truncated:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    example: false
+            description: KubeContextsResponse is the kubeconfig's contexts.
+        KubeContext:
+            type: object
+            properties:
+                name:
+                    type: string
+                    examples:
+                        - orbstack
+                        - prod-eu
+                    example: orbstack
+                cluster:
+                    type: string
+                    examples:
+                        - orbstack
+                    example: orbstack
+                server:
+                    type: string
+                    examples:
+                        - https://127.0.0.1:26443
+                    example: https://127.0.0.1:26443
+            description: |-
+                KubeContext is one context of the kubeconfig the daemon reads. It carries
+                 no credentials.
+        ListKubeNamespacesRequest:
+            type: object
+            properties:
+                context:
+                    type: string
+            description: ListKubeNamespacesRequest names the context to ask.
+        KubeNamespacesResponse:
+            type: object
+            properties:
+                names:
+                    type: array
+                    items:
+                        type: string
+                        examples:
+                            - shop
+                            - payments
+                            - default
+                        example: shop
+                forbidden:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    description: |-
+                        True when the Role cannot list namespaces, so names is empty without
+                         that meaning the cluster has none.
+                    example: false
+            description: KubeNamespacesResponse is what one cluster answered.
+        ListIncidentsRequest:
+            type: object
+            properties:
+                clusterIds:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+                state:
+                    type: string
+                    description: |-
+                        One of open, acknowledged, recovered, pod_deleted, job_finished, manual,
+                         dismissed, attention.
+                category:
+                    type: string
+                    description: |-
+                        One of the Category values as stored: oom, crash, unclean_exit,
+                         image_pull, config, probe, scheduling, node_pressure, rescheduled,
+                         job_failed, stuck, other.
+                namespace:
+                    type: string
+                workloadKind:
+                    type: string
+                workloadName:
+                    type: string
+                podUid:
+                    type: string
+                jobUid:
+                    type: string
+                limit:
+                    type: integer
+                    format: int32
+                    description: Zero means the daemon's configured default.
+                nodeName:
+                    type: string
+                    description: |-
+                        Only the incidents opened on this node; a pod that had no node when its
+                         incident opened matches nothing.
+                podName:
+                    type: string
+                    description: |-
+                        pod_name is an exact match on the pod's name, so a client holding a
+                         name from a truncated list still reaches its rows.
+            description: |-
+                ListIncidentsRequest scopes and filters the triage list. An empty filter
+                 means the filter is not applied.
+        IncidentsResponse:
+            type: object
+            properties:
+                incidents:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/IncidentRow'
+                truncated:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    example: false
+            description: IncidentsResponse is the triage list.
+        IncidentRow:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "412"
+                        - "413"
+                    format: int64
+                    example: "412"
+                clusterId:
+                    type: string
+                    examples:
+                        - "1"
+                        - "2"
+                    format: int64
+                    example: "1"
+                namespace:
+                    type: string
+                    examples:
+                        - shop
+                        - payments
+                    example: shop
+                subjectKind:
+                    type: string
+                    enum:
+                        - SUBJECT_KIND_UNSPECIFIED
+                        - pod
+                        - job
+                    description: SubjectKind distinguishes which kind of workload an incident is about.
+                podUid:
+                    type: string
+                    examples:
+                        - 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                    example: 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                jobUid:
+                    type: string
+                    examples:
+                        - 6d3a1f80-9c2b-4e77-b1a5-0e9f8d7c6b5a
+                    example: 6d3a1f80-9c2b-4e77-b1a5-0e9f8d7c6b5a
+                containerName:
+                    type: string
+                    examples:
+                        - checkout-api
+                        - ""
+                    example: checkout-api
+                workloadKind:
+                    type: string
+                    examples:
+                        - Deployment
+                        - Job
+                    example: Deployment
+                workloadName:
+                    type: string
+                    examples:
+                        - checkout-api
+                    example: checkout-api
+                category:
+                    type: string
+                    enum:
+                        - CATEGORY_UNSPECIFIED
+                        - oom
+                        - crash
+                        - image_pull
+                        - config
+                        - probe
+                        - scheduling
+                        - node_pressure
+                        - rescheduled
+                        - job_failed
+                        - other
+                        - stuck
+                        - unclean_exit
+                    description: Category classifies what kind of incident was observed.
+                firstReason:
+                    type: string
+                    examples:
+                        - Error
+                        - CrashLoopBackOff
+                    example: Error
+                lastReason:
+                    type: string
+                    examples:
+                        - CrashLoopBackOff
+                        - OOMKilled
+                    example: CrashLoopBackOff
+                lastMessage:
+                    type: string
+                    examples:
+                        - back-off 5m0s restarting failed container=checkout-api
+                    example: back-off 5m0s restarting failed container=checkout-api
+                image:
+                    type: string
+                    examples:
+                        - registry.example.com/checkout-api:1.42.0
+                    example: registry.example.com/checkout-api:1.42.0
+                imageTag:
+                    type: string
+                    examples:
+                        - 1.42.0
+                    example: 1.42.0
+                imageId:
+                    type: string
+                    examples:
+                        - registry.example.com/checkout-api@sha256:9f2e5c0a1b7d4e6f8a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f
+                    example: registry.example.com/checkout-api@sha256:9f2e5c0a1b7d4e6f8a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f
+                occurrences:
+                    type: integer
+                    examples:
+                        - 7
+                        - 1
+                        - 23
+                    format: int32
+                    example: 7
+                openedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:11.482913Z"
+                    example: "2026-08-27T14:03:11.482913Z"
+                lastSeenAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:09:41.115204Z"
+                    example: "2026-08-27T14:09:41.115204Z"
+                closedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:19:03.220118Z"
+                    example: "2026-08-27T14:19:03.220118Z"
+                closeReason:
+                    type: string
+                    enum:
+                        - CLOSE_REASON_UNSPECIFIED
+                        - recovered
+                        - pod_deleted
+                        - job_finished
+                        - manual
+                    description: CloseReason records why an incident was closed.
+                acknowledgedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:05:00.000000Z"
+                    example: "2026-08-27T14:05:00.000000Z"
+                dismissedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:22:31.771903Z"
+                    example: "2026-08-27T14:22:31.771903Z"
+                note:
+                    type: string
+                    examples:
+                        - waiting on the 1.42.1 image
+                    example: waiting on the 1.42.1 image
+                state:
+                    type: string
+                    enum:
+                        - INCIDENT_STATE_UNSPECIFIED
+                        - open
+                        - acknowledged
+                        - recovered
+                        - pod_deleted
+                        - job_finished
+                        - manual
+                        - dismissed
+                        - attention
+                    description: |-
+                        IncidentState is the state derived from the timestamps of an incident row;
+                         it is not a stored column.
+                podName:
+                    type: string
+                    examples:
+                        - checkout-api-7d9f8b6c4-x2kqp
+                    example: checkout-api-7d9f8b6c4-x2kqp
+                podDeletedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:11:02.660713Z"
+                    example: "2026-08-27T14:11:02.660713Z"
+                podDeletionReason:
+                    type: string
+                    enum:
+                        - DELETION_REASON_UNSPECIFIED
+                        - rollout
+                        - replaced
+                        - scaled_down
+                        - job_pruned
+                        - unknown
+                        - evicted
+                    description: DeletionReason is the inferred reason a pod was removed.
+                containerCount:
+                    type: integer
+                    examples:
+                        - 2
+                        - 1
+                    format: int32
+                    example: 2
+                exitCode:
+                    type: integer
+                    examples:
+                        - 137
+                        - 1
+                    format: int32
+                    example: 137
+                signal:
+                    type: integer
+                    examples:
+                        - 9
+                    format: int32
+                    example: 9
+                nodeName:
+                    type: string
+                    examples:
+                        - node-a
+                        - node-b
+                    description: |-
+                        The node the pod was on when the incident opened, denormalised at open;
+                         absent for a job incident and for a pod that had no node yet.
+                    example: node-a
+            description: |-
+                IncidentRow is one row of the triage list: the incidents columns, the
+                 derived state, and the pod facts the list shows beside them.
+        GetIncidentCountsRequest:
+            type: object
+            properties:
+                clusterIds:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+                state:
+                    type: string
+                    description: |-
+                        One of open, acknowledged, recovered, pod_deleted, job_finished, manual,
+                         dismissed, attention.
+                category:
+                    type: string
+                    description: |-
+                        One of the Category values as stored: oom, crash, unclean_exit,
+                         image_pull, config, probe, scheduling, node_pressure, rescheduled,
+                         job_failed, stuck, other.
+            description: |-
+                GetIncidentCountsRequest scopes the sidebar numbers. An empty filter means
+                 the filter is not applied.
+        IncidentCounts:
+            type: object
+            properties:
+                byState:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/StateCount'
+                byCategory:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CategoryCount'
+            description: |-
+                IncidentCounts holds the sidebar numbers. Each list is faceted: it is
+                 filtered by the other axis's request field, never by its own, so a count
+                 answers what the list would hold once its own facet is picked.
+        StateCount:
+            type: object
+            properties:
+                state:
+                    type: string
+                    enum:
+                        - INCIDENT_STATE_UNSPECIFIED
+                        - open
+                        - acknowledged
+                        - recovered
+                        - pod_deleted
+                        - job_finished
+                        - manual
+                        - dismissed
+                        - attention
+                    description: |-
+                        IncidentState is the state derived from the timestamps of an incident row;
+                         it is not a stored column.
+                count:
+                    type: integer
+                    examples:
+                        - 4
+                        - 1
+                        - 17
+                    format: int32
+                    example: 4
+            description: StateCount is one incident state and how many incidents hold it.
+        CategoryCount:
+            type: object
+            properties:
+                category:
+                    type: string
+                    enum:
+                        - CATEGORY_UNSPECIFIED
+                        - oom
+                        - crash
+                        - image_pull
+                        - config
+                        - probe
+                        - scheduling
+                        - node_pressure
+                        - rescheduled
+                        - job_failed
+                        - other
+                        - stuck
+                        - unclean_exit
+                    description: Category classifies what kind of incident was observed.
+                count:
+                    type: integer
+                    examples:
+                        - 3
+                        - 1
+                        - 9
+                    format: int32
+                    example: 3
+            description: CategoryCount is one category and how many incidents hold it.
+        GetIncidentRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+            description: GetIncidentRequest addresses one incidents row.
+        IncidentDetail:
+            type: object
+            properties:
+                incident:
+                    $ref: '#/components/schemas/IncidentRow'
+                pod:
+                    $ref: '#/components/schemas/Pod'
+                containers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Container'
+                artifacts:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Artifact'
+                events:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/K8sEvent'
+                conditions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/PodCondition'
+                job:
+                    $ref: '#/components/schemas/JobRow'
+                lastPodName:
+                    type: string
+                    description: |-
+                        The newest pod the recorder saw for that Job, which may since have been
+                         pruned from the cluster.
+                grafanaUrl:
+                    type: string
+                    examples:
+                        - https://logs.example.grafana.net/explore?schemaVersion=1&panes=...
+                    description: |-
+                        The Explore URL scoped to the subject container, or the whole pod when
+                         there is no subject container; absent when the cluster is unconfigured
+                         or the incident has no pod.
+                    example: https://logs.example.grafana.net/explore?schemaVersion=1&panes=...
+                relatedIncidents:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/IncidentRow'
+            description: IncidentDetail is everything the incident page shows.
+        Pod:
+            type: object
+            properties:
+                uid:
+                    type: string
+                    examples:
+                        - 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                    example: 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                clusterId:
+                    type: string
+                    examples:
+                        - "1"
+                        - "2"
+                    format: int64
+                    example: "1"
+                namespace:
+                    type: string
+                    examples:
+                        - shop
+                        - payments
+                    example: shop
+                name:
+                    type: string
+                    examples:
+                        - checkout-api-7d9f8b6c4-x2kqp
+                    example: checkout-api-7d9f8b6c4-x2kqp
+                nodeName:
+                    type: string
+                    examples:
+                        - orbstack
+                    example: orbstack
+                phase:
+                    type: string
+                    examples:
+                        - Running
+                        - Pending
+                        - Failed
+                    example: Running
+                statusReason:
+                    type: string
+                    examples:
+                        - Unschedulable
+                    example: Unschedulable
+                statusMessage:
+                    type: string
+                    examples:
+                        - '0/1 nodes are available: 1 Insufficient cpu.'
+                    example: '0/1 nodes are available: 1 Insufficient cpu.'
+                deletionRequestedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:07:52.104881Z"
+                    example: "2026-08-27T14:07:52.104881Z"
+                qosClass:
+                    type: string
+                    examples:
+                        - Burstable
+                        - Guaranteed
+                    example: Burstable
+                controllerKind:
+                    type: string
+                    examples:
+                        - ReplicaSet
+                        - Job
+                    example: ReplicaSet
+                controllerName:
+                    type: string
+                    examples:
+                        - checkout-api-7d9f8b6c4
+                    example: checkout-api-7d9f8b6c4
+                controllerUid:
+                    type: string
+                    examples:
+                        - 3c1d0b2a-77aa-4f31-9b02-5d6e7f801122
+                    example: 3c1d0b2a-77aa-4f31-9b02-5d6e7f801122
+                workloadKind:
+                    type: string
+                    examples:
+                        - Deployment
+                        - Job
+                        - StatefulSet
+                    example: Deployment
+                workloadName:
+                    type: string
+                    examples:
+                        - checkout-api
+                    example: checkout-api
+                createdAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:02:58.000000Z"
+                    example: "2026-08-27T14:02:58.000000Z"
+                startedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:04.000000Z"
+                    example: "2026-08-27T14:03:04.000000Z"
+                firstSeenAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:11.482913Z"
+                    example: "2026-08-27T14:03:11.482913Z"
+                lastSeenAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:09:41.115204Z"
+                    example: "2026-08-27T14:09:41.115204Z"
+                deletedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:11:02.660713Z"
+                    example: "2026-08-27T14:11:02.660713Z"
+                deletionSource:
+                    type: string
+                    enum:
+                        - DELETION_SOURCE_UNSPECIFIED
+                        - watch
+                        - reconcile
+                        - unwatched
+                    description: DeletionSource records which path observed a pod's removal.
+                deletionReason:
+                    type: string
+                    enum:
+                        - DELETION_REASON_UNSPECIFIED
+                        - rollout
+                        - replaced
+                        - scaled_down
+                        - job_pruned
+                        - unknown
+                        - evicted
+                    description: DeletionReason is the inferred reason a pod was removed.
+            description: Pod is a row of the pods table.
+        Container:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "412"
+                        - "413"
+                    format: int64
+                    example: "412"
+                podUid:
+                    type: string
+                    examples:
+                        - 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                    example: 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                name:
+                    type: string
+                    examples:
+                        - checkout-api
+                        - envoy
+                    example: checkout-api
+                kind:
+                    type: string
+                    enum:
+                        - CONTAINER_KIND_UNSPECIFIED
+                        - init
+                        - sidecar
+                        - app
+                        - ephemeral
+                    description: |-
+                        ContainerKind is a container's role within a pod spec; it decides what
+                         ready means for the container.
+                image:
+                    type: string
+                    examples:
+                        - registry.example.com/checkout-api:1.42.0
+                    example: registry.example.com/checkout-api:1.42.0
+                imageTag:
+                    type: string
+                    examples:
+                        - 1.42.0
+                    example: 1.42.0
+                imageId:
+                    type: string
+                    examples:
+                        - registry.example.com/checkout-api@sha256:9f2e5c0a1b7d4e6f8a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f
+                    example: registry.example.com/checkout-api@sha256:9f2e5c0a1b7d4e6f8a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f
+                containerId:
+                    type: string
+                    examples:
+                        - containerd://5b1a9c0d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b
+                    example: containerd://5b1a9c0d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b
+                cpuRequest:
+                    type: string
+                    examples:
+                        - 100m
+                        - "1"
+                    example: 100m
+                cpuLimit:
+                    type: string
+                    examples:
+                        - 500m
+                        - "2"
+                    example: 500m
+                memRequest:
+                    type: string
+                    examples:
+                        - 128Mi
+                    example: 128Mi
+                memLimit:
+                    type: string
+                    examples:
+                        - 256Mi
+                    example: 256Mi
+                cpuRequestMillis:
+                    type: string
+                    examples:
+                        - "100"
+                        - "1000"
+                    format: int64
+                    example: "100"
+                cpuLimitMillis:
+                    type: string
+                    examples:
+                        - "500"
+                        - "2000"
+                    format: int64
+                    example: "500"
+                memRequestBytes:
+                    type: string
+                    examples:
+                        - "134217728"
+                    format: int64
+                    example: "134217728"
+                memLimitBytes:
+                    type: string
+                    examples:
+                        - "268435456"
+                    format: int64
+                    example: "268435456"
+                state:
+                    type: string
+                    enum:
+                        - CONTAINER_STATE_UNSPECIFIED
+                        - waiting
+                        - running
+                        - terminated
+                    description: ContainerState is a container's lifecycle state.
+                reason:
+                    type: string
+                    examples:
+                        - CrashLoopBackOff
+                        - OOMKilled
+                        - ImagePullBackOff
+                    example: CrashLoopBackOff
+                exitCode:
+                    type: integer
+                    examples:
+                        - 137
+                        - 1
+                        - 0
+                    format: int32
+                    example: 137
+                signal:
+                    type: integer
+                    examples:
+                        - 9
+                        - 15
+                    format: int32
+                    example: 9
+                ready:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    example: false
+                restartCount:
+                    type: integer
+                    examples:
+                        - 7
+                        - 0
+                        - 3
+                    format: int32
+                    example: 7
+                runningSince:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:04.000000Z"
+                    example: "2026-08-27T14:03:04.000000Z"
+                lastTerminatedReason:
+                    type: string
+                    examples:
+                        - Error
+                        - OOMKilled
+                    example: Error
+                lastTerminatedExitCode:
+                    type: integer
+                    examples:
+                        - 137
+                        - 1
+                    format: int32
+                    example: 137
+                lastTerminatedSignal:
+                    type: integer
+                    examples:
+                        - 9
+                    format: int32
+                    example: 9
+                lastTerminatedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:11.000000Z"
+                    example: "2026-08-27T14:03:11.000000Z"
+                updatedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:09:41.115204Z"
+                    example: "2026-08-27T14:09:41.115204Z"
+                grafanaUrl:
+                    type: string
+                    examples:
+                        - https://logs.example.grafana.net/explore?schemaVersion=1&panes=...
+                    description: |-
+                        The Explore URL scoped to this container's own run; absent when the
+                         cluster is unconfigured for Grafana.
+                    example: https://logs.example.grafana.net/explore?schemaVersion=1&panes=...
+            description: |-
+                Container is a row of the containers table: the latest snapshot of one
+                 container of a pod.
+        Artifact:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "12"
+                        - "13"
+                    format: int64
+                    example: "12"
+                podUid:
+                    type: string
+                    examples:
+                        - 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                    example: 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                incidentId:
+                    type: string
+                    examples:
+                        - "412"
+                    format: int64
+                    example: "412"
+                containerName:
+                    type: string
+                    examples:
+                        - checkout-api
+                        - envoy
+                    example: checkout-api
+                kind:
+                    type: string
+                    enum:
+                        - ARTIFACT_KIND_UNSPECIFIED
+                        - log_previous
+                        - log_current
+                        - pod_json
+                    description: ArtifactKind says what an artifact file captured.
+                restartCount:
+                    type: integer
+                    examples:
+                        - 6
+                        - -1
+                    format: int32
+                    example: 6
+                filePath:
+                    type: string
+                    examples:
+                        - 1/shop/checkout-api-7d9f8b6c4-x2kqp/checkout-api.6.previous.log
+                    example: 1/shop/checkout-api-7d9f8b6c4-x2kqp/checkout-api.6.previous.log
+                sizeBytes:
+                    type: string
+                    examples:
+                        - "18432"
+                        - "262144"
+                    format: int64
+                    example: "18432"
+                truncated:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    example: false
+                capturedEarly:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    example: false
+                captureGap:
+                    type: string
+                    enum:
+                        - CAPTURE_GAP_UNSPECIFIED
+                        - pod_deleted
+                        - no_previous_run
+                        - forbidden
+                        - no_output
+                        - kubelet_error
+                        - unknown
+                        - unobservable
+                    description: CaptureGap explains why an artifact holds no file.
+                captureNote:
+                    type: string
+                    examples:
+                        - the pod was gone before the log could be read
+                    example: the pod was gone before the log could be read
+                capturedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:12.904551Z"
+                    example: "2026-08-27T14:03:12.904551Z"
+            description: |-
+                Artifact is a row of the artifacts table: one captured file, or the
+                 record of why there is none.
+        K8sEvent:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "1204"
+                        - "1205"
+                    format: int64
+                    example: "1204"
+                clusterId:
+                    type: string
+                    examples:
+                        - "1"
+                        - "2"
+                    format: int64
+                    example: "1"
+                eventUid:
+                    type: string
+                    examples:
+                        - b2f7c9d1-3e4a-4b5c-8d9e-0f1a2b3c4d5e
+                    example: b2f7c9d1-3e4a-4b5c-8d9e-0f1a2b3c4d5e
+                namespace:
+                    type: string
+                    examples:
+                        - shop
+                        - payments
+                    example: shop
+                type:
+                    type: string
+                    examples:
+                        - Warning
+                        - Normal
+                    example: Warning
+                involvedKind:
+                    type: string
+                    examples:
+                        - Pod
+                        - Job
+                    example: Pod
+                involvedName:
+                    type: string
+                    examples:
+                        - checkout-api-7d9f8b6c4-x2kqp
+                    example: checkout-api-7d9f8b6c4-x2kqp
+                involvedUid:
+                    type: string
+                    examples:
+                        - 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                    example: 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                fieldPath:
+                    type: string
+                    examples:
+                        - spec.containers{checkout-api}
+                        - ""
+                    example: spec.containers{checkout-api}
+                reason:
+                    type: string
+                    examples:
+                        - BackOff
+                        - Failed
+                        - Unhealthy
+                    example: BackOff
+                message:
+                    type: string
+                    examples:
+                        - Back-off restarting failed container checkout-api in pod checkout-api-7d9f8b6c4-x2kqp
+                    example: Back-off restarting failed container checkout-api in pod checkout-api-7d9f8b6c4-x2kqp
+                sourceComponent:
+                    type: string
+                    examples:
+                        - kubelet
+                        - default-scheduler
+                    example: kubelet
+                count:
+                    type: integer
+                    examples:
+                        - 7
+                        - 1
+                    format: int32
+                    example: 7
+                firstTs:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:11.000000Z"
+                    example: "2026-08-27T14:03:11.000000Z"
+                lastTs:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:09:38.000000Z"
+                    example: "2026-08-27T14:09:38.000000Z"
+                category:
+                    type: string
+                    enum:
+                        - CATEGORY_UNSPECIFIED
+                        - oom
+                        - crash
+                        - image_pull
+                        - config
+                        - probe
+                        - scheduling
+                        - node_pressure
+                        - rescheduled
+                        - job_failed
+                        - other
+                        - stuck
+                        - unclean_exit
+                    description: Category classifies what kind of incident was observed.
+                incidentId:
+                    type: string
+                    examples:
+                        - "412"
+                    format: int64
+                    example: "412"
+            description: |-
+                K8sEvent is a row of the k8s_events table. The stored raw_json is not on
+                 the wire: it is a duplicate of the columns beside it.
+        PodCondition:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "88"
+                        - "89"
+                    format: int64
+                    example: "88"
+                podUid:
+                    type: string
+                    examples:
+                        - 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                    example: 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                type:
+                    type: string
+                    examples:
+                        - Ready
+                        - ContainersReady
+                        - PodScheduled
+                    example: Ready
+                status:
+                    type: string
+                    examples:
+                        - "False"
+                        - "True"
+                        - Unknown
+                    example: "False"
+                reason:
+                    type: string
+                    examples:
+                        - ContainersNotReady
+                        - ""
+                    example: ContainersNotReady
+                message:
+                    type: string
+                    examples:
+                        - 'containers with unready status: [checkout-api]'
+                    example: 'containers with unready status: [checkout-api]'
+                k8sTransitionAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:11.000000Z"
+                    example: "2026-08-27T14:03:11.000000Z"
+                observedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:11.482913Z"
+                    example: "2026-08-27T14:03:11.482913Z"
+            description: PodCondition is a row of the pod_condition_history table.
+        JobRow:
+            type: object
+            properties:
+                uid:
+                    type: string
+                    examples:
+                        - 6d3a1f80-9c2b-4e77-b1a5-0e9f8d7c6b5a
+                    example: 6d3a1f80-9c2b-4e77-b1a5-0e9f8d7c6b5a
+                clusterId:
+                    type: string
+                    examples:
+                        - "1"
+                        - "2"
+                    format: int64
+                    example: "1"
+                namespace:
+                    type: string
+                    examples:
+                        - shop
+                        - payments
+                    example: shop
+                name:
+                    type: string
+                    examples:
+                        - nightly-reindex-29283840
+                    example: nightly-reindex-29283840
+                cronjobUid:
+                    type: string
+                    examples:
+                        - f0e1d2c3-b4a5-4968-8778-695a4b3c2d1e
+                    example: f0e1d2c3-b4a5-4968-8778-695a4b3c2d1e
+                cronjobName:
+                    type: string
+                    examples:
+                        - nightly-reindex
+                    example: nightly-reindex
+                active:
+                    type: integer
+                    examples:
+                        - 0
+                        - 1
+                    format: int32
+                    example: 0
+                succeeded:
+                    type: integer
+                    examples:
+                        - 1
+                        - 0
+                    format: int32
+                    example: 1
+                failed:
+                    type: integer
+                    examples:
+                        - 0
+                        - 3
+                    format: int32
+                    example: 0
+                backoffLimit:
+                    type: integer
+                    examples:
+                        - 6
+                        - 0
+                    format: int32
+                    example: 6
+                completions:
+                    type: integer
+                    examples:
+                        - 1
+                    format: int32
+                    example: 1
+                parallelism:
+                    type: integer
+                    examples:
+                        - 1
+                    format: int32
+                    example: 1
+                restartPolicy:
+                    type: string
+                    examples:
+                        - Never
+                        - OnFailure
+                    example: Never
+                conditionType:
+                    type: string
+                    examples:
+                        - Complete
+                        - Failed
+                    example: Complete
+                conditionReason:
+                    type: string
+                    examples:
+                        - BackoffLimitExceeded
+                    example: BackoffLimitExceeded
+                conditionMessage:
+                    type: string
+                    examples:
+                        - Job has reached the specified backoff limit
+                    example: Job has reached the specified backoff limit
+                createdAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:00:00.000000Z"
+                    example: "2026-08-27T14:00:00.000000Z"
+                startedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:00:02.000000Z"
+                    example: "2026-08-27T14:00:02.000000Z"
+                finishedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:04:37.000000Z"
+                    example: "2026-08-27T14:04:37.000000Z"
+                firstSeenAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:00:03.117442Z"
+                    example: "2026-08-27T14:00:03.117442Z"
+                lastSeenAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:04:38.902311Z"
+                    example: "2026-08-27T14:04:38.902311Z"
+                deletedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T15:00:00.412009Z"
+                    example: "2026-08-27T15:00:00.412009Z"
+                complete:
+                    type: boolean
+                    examples:
+                        - true
+                        - false
+                    description: |-
+                        condition_type is Complete. The succeeded counter counts pods, which is
+                         not the same fact, so it is never read for this.
+                    example: true
+                activeDeadlineSeconds:
+                    type: string
+                    examples:
+                        - "900"
+                    format: int64
+                    description: |-
+                        The Job's own spec.activeDeadlineSeconds; a DeadlineExceeded failure is
+                         unreadable without the deadline it names.
+                    example: "900"
+            description: |-
+                JobRow is one row of the job list: the jobs columns and whether the job
+                 finished successfully.
+        IncidentTimelineRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+            description: IncidentTimelineRequest addresses one incident's timeline.
+        TimelineResponse:
+            type: object
+            properties:
+                entries:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/TimelineEntry'
+                truncated:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    example: false
+            description: TimelineResponse is one incident's timeline, in merge order.
+        TimelineEntry:
+            type: object
+            properties:
+                kind:
+                    type: string
+                    enum:
+                        - TIMELINE_KIND_UNSPECIFIED
+                        - container_transition
+                        - condition
+                        - event
+                        - capture
+                        - rollout
+                        - lifecycle
+                        - cut
+                    description: |-
+                        TimelineKind says which source a timeline entry came from; the order of
+                         the values is the tie-break order when two entries share a time.
+                k8sAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:11.000000Z"
+                    example: "2026-08-27T14:03:11.000000Z"
+                observedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:11.482913Z"
+                    example: "2026-08-27T14:03:11.482913Z"
+                containerName:
+                    type: string
+                    examples:
+                        - checkout-api
+                    example: checkout-api
+                state:
+                    type: string
+                    enum:
+                        - CONTAINER_STATE_UNSPECIFIED
+                        - waiting
+                        - running
+                        - terminated
+                    description: ContainerState is a container's lifecycle state.
+                reason:
+                    type: string
+                    examples:
+                        - Error
+                        - CrashLoopBackOff
+                    example: Error
+                exitCode:
+                    type: integer
+                    examples:
+                        - 137
+                        - 1
+                    format: int32
+                    example: 137
+                signal:
+                    type: integer
+                    examples:
+                        - 9
+                    format: int32
+                    example: 9
+                restartCount:
+                    type: integer
+                    examples:
+                        - 7
+                        - 0
+                    format: int32
+                    example: 7
+                gapReconstructed:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    example: false
+                conditionType:
+                    type: string
+                    examples:
+                        - Ready
+                        - ContainersReady
+                    example: Ready
+                conditionStatus:
+                    type: string
+                    examples:
+                        - "False"
+                        - "True"
+                    example: "False"
+                message:
+                    type: string
+                    examples:
+                        - Back-off restarting failed container checkout-api
+                    example: Back-off restarting failed container checkout-api
+                eventType:
+                    type: string
+                    examples:
+                        - Warning
+                        - Normal
+                    example: Warning
+                eventReason:
+                    type: string
+                    examples:
+                        - BackOff
+                        - Unhealthy
+                    example: BackOff
+                count:
+                    type: integer
+                    examples:
+                        - 7
+                        - 1
+                    format: int32
+                    example: 7
+                artifactId:
+                    type: string
+                    examples:
+                        - "12"
+                    format: int64
+                    example: "12"
+                artifactKind:
+                    type: string
+                    enum:
+                        - ARTIFACT_KIND_UNSPECIFIED
+                        - log_previous
+                        - log_current
+                        - pod_json
+                    description: ArtifactKind says what an artifact file captured.
+                captureGap:
+                    type: string
+                    enum:
+                        - CAPTURE_GAP_UNSPECIFIED
+                        - pod_deleted
+                        - no_previous_run
+                        - forbidden
+                        - no_output
+                        - kubelet_error
+                        - unknown
+                        - unobservable
+                    description: CaptureGap explains why an artifact holds no file.
+                replicasetName:
+                    type: string
+                    examples:
+                        - checkout-api-7d9f8b6c4
+                    example: checkout-api-7d9f8b6c4
+                imageTag:
+                    type: string
+                    examples:
+                        - 1.42.0
+                    example: 1.42.0
+                revision:
+                    type: string
+                    examples:
+                        - "8"
+                        - "7"
+                    format: int64
+                    example: "8"
+                lifecycle:
+                    type: string
+                    enum:
+                        - LIFECYCLE_STEP_UNSPECIFIED
+                        - opened
+                        - closed
+                    description: LifecycleStep is which end of an incident's life a lifecycle entry marks.
+                closeReason:
+                    type: string
+                    enum:
+                        - CLOSE_REASON_UNSPECIFIED
+                        - recovered
+                        - pod_deleted
+                        - job_finished
+                        - manual
+                    description: CloseReason records why an incident was closed.
+            description: |-
+                TimelineEntry is one merged event on an incident's timeline. Which fields
+                 are set follows from kind.
+        StreamIncidentsRequest:
+            type: object
+            properties:
+                clusterIds:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+            description: StreamIncidentsRequest scopes the incident stream.
+        StreamClustersRequest:
+            type: object
+            properties:
+                clusterIds:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+            description: StreamClustersRequest scopes the cluster stream.
+        ListPodsRequest:
+            type: object
+            properties:
+                clusterIds:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+                namespace:
+                    type: string
+                workloadKind:
+                    type: string
+                workloadName:
+                    type: string
+                live:
+                    type: string
+                    description: '"true" for live pods, "false" for deleted ones, absent for both.'
+                limit:
+                    type: integer
+                    format: int32
+                    description: Zero means the daemon's configured default.
+                podName:
+                    type: string
+                    description: |-
+                        pod_name is an exact match on name, so a client holding a name from a
+                         truncated list still reaches its row.
+                jobUid:
+                    type: string
+                    description: |-
+                        job_uid is the controller uid of the Job that owns the pod, so a run can
+                         list every attempt it made and not only the ones that failed.
+            description: ListPodsRequest scopes and filters the pod list.
+        PodsResponse:
+            type: object
+            properties:
+                pods:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/PodRow'
+                truncated:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    example: false
+            description: PodsResponse is the pod list.
+        PodRow:
+            type: object
+            properties:
+                uid:
+                    type: string
+                    examples:
+                        - 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                    example: 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                clusterId:
+                    type: string
+                    examples:
+                        - "1"
+                        - "2"
+                    format: int64
+                    example: "1"
+                namespace:
+                    type: string
+                    examples:
+                        - shop
+                        - payments
+                    example: shop
+                name:
+                    type: string
+                    examples:
+                        - checkout-api-7d9f8b6c4-x2kqp
+                    example: checkout-api-7d9f8b6c4-x2kqp
+                nodeName:
+                    type: string
+                    examples:
+                        - orbstack
+                    example: orbstack
+                phase:
+                    type: string
+                    examples:
+                        - Running
+                        - Pending
+                        - Failed
+                    example: Running
+                statusReason:
+                    type: string
+                    examples:
+                        - Unschedulable
+                    example: Unschedulable
+                statusMessage:
+                    type: string
+                    examples:
+                        - '0/1 nodes are available: 1 Insufficient cpu.'
+                    example: '0/1 nodes are available: 1 Insufficient cpu.'
+                deletionRequestedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:07:52.104881Z"
+                    example: "2026-08-27T14:07:52.104881Z"
+                qosClass:
+                    type: string
+                    examples:
+                        - Burstable
+                        - Guaranteed
+                    example: Burstable
+                controllerKind:
+                    type: string
+                    examples:
+                        - ReplicaSet
+                        - Job
+                    example: ReplicaSet
+                controllerName:
+                    type: string
+                    examples:
+                        - checkout-api-7d9f8b6c4
+                    example: checkout-api-7d9f8b6c4
+                controllerUid:
+                    type: string
+                    examples:
+                        - 3c1d0b2a-77aa-4f31-9b02-5d6e7f801122
+                    example: 3c1d0b2a-77aa-4f31-9b02-5d6e7f801122
+                workloadKind:
+                    type: string
+                    examples:
+                        - Deployment
+                        - Job
+                        - StatefulSet
+                    example: Deployment
+                workloadName:
+                    type: string
+                    examples:
+                        - checkout-api
+                    example: checkout-api
+                createdAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:02:58.000000Z"
+                    example: "2026-08-27T14:02:58.000000Z"
+                startedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:04.000000Z"
+                    example: "2026-08-27T14:03:04.000000Z"
+                firstSeenAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:11.482913Z"
+                    example: "2026-08-27T14:03:11.482913Z"
+                lastSeenAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:09:41.115204Z"
+                    example: "2026-08-27T14:09:41.115204Z"
+                deletedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:11:02.660713Z"
+                    example: "2026-08-27T14:11:02.660713Z"
+                deletionSource:
+                    type: string
+                    enum:
+                        - DELETION_SOURCE_UNSPECIFIED
+                        - watch
+                        - reconcile
+                        - unwatched
+                    description: DeletionSource records which path observed a pod's removal.
+                deletionReason:
+                    type: string
+                    enum:
+                        - DELETION_REASON_UNSPECIFIED
+                        - rollout
+                        - replaced
+                        - scaled_down
+                        - job_pruned
+                        - unknown
+                        - evicted
+                    description: DeletionReason is the inferred reason a pod was removed.
+                openIncidents:
+                    type: integer
+                    examples:
+                        - 1
+                        - 0
+                        - 2
+                    format: int32
+                    example: 1
+                containerCount:
+                    type: integer
+                    examples:
+                        - 2
+                        - 1
+                    format: int32
+                    example: 2
+                worstState:
+                    type: string
+                    enum:
+                        - CONTAINER_STATE_UNSPECIFIED
+                        - waiting
+                        - running
+                        - terminated
+                    description: ContainerState is a container's lifecycle state.
+            description: |-
+                PodRow is one row of the pod list: the pods columns and the counts the
+                 list shows beside them.
+        GetPodRequest:
+            type: object
+            properties:
+                uid:
+                    type: string
+            description: GetPodRequest addresses one pods row.
+        PodDetail:
+            type: object
+            properties:
+                pod:
+                    $ref: '#/components/schemas/PodRow'
+                containers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Container'
+                conditions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/PodCondition'
+                incidents:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/IncidentRow'
+                artifacts:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Artifact'
+                siblings:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/SiblingPod'
+                siblingTotal:
+                    type: integer
+                    format: int32
+                    description: Every pod of the controller in this cluster, this one included.
+            description: PodDetail is everything the pod page shows.
+        SiblingPod:
+            type: object
+            properties:
+                uid:
+                    type: string
+                    examples:
+                        - a1b2c3d4-5e6f-4708-8192-a3b4c5d6e7f8
+                    example: a1b2c3d4-5e6f-4708-8192-a3b4c5d6e7f8
+                name:
+                    type: string
+                    examples:
+                        - checkout-api-7d9f8b6c4-m4tzv
+                    example: checkout-api-7d9f8b6c4-m4tzv
+                phase:
+                    type: string
+                    examples:
+                        - Running
+                        - Failed
+                    example: Running
+                deletedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:11:02.660713Z"
+                    example: "2026-08-27T14:11:02.660713Z"
+                restartCount:
+                    type: integer
+                    examples:
+                        - 0
+                        - 7
+                    format: int32
+                    example: 0
+                ready:
+                    type: boolean
+                    examples:
+                        - true
+                        - false
+                    example: true
+                worstOpenCategory:
+                    type: string
+                    enum:
+                        - CATEGORY_UNSPECIFIED
+                        - oom
+                        - crash
+                        - image_pull
+                        - config
+                        - probe
+                        - scheduling
+                        - node_pressure
+                        - rescheduled
+                        - job_failed
+                        - other
+                        - stuck
+                        - unclean_exit
+                    description: Category classifies what kind of incident was observed.
+            description: SiblingPod is another pod of the same controller, live or deleted.
+        PodEventsRequest:
+            type: object
+            properties:
+                uid:
+                    type: string
+                limit:
+                    type: integer
+                    format: int32
+                    description: Zero means the daemon's configured default.
+            description: PodEventsRequest addresses one pod's events.
+        EventsResponse:
+            type: object
+            properties:
+                events:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/K8sEvent'
+                truncated:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    example: false
+            description: EventsResponse is a pod's events, newest first.
+        PodHistoryRequest:
+            type: object
+            properties:
+                uid:
+                    type: string
+            description: PodHistoryRequest addresses one pod's stored history.
+        HistoryResponse:
+            type: object
+            properties:
+                transitions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ContainerStateHistory'
+                conditions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/PodCondition'
+            description: |-
+                HistoryResponse is a pod's container transitions and conditions, oldest
+                 first.
+        ContainerStateHistory:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "3301"
+                        - "3302"
+                    format: int64
+                    example: "3301"
+                podUid:
+                    type: string
+                    examples:
+                        - 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                    example: 8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70
+                containerName:
+                    type: string
+                    examples:
+                        - checkout-api
+                        - envoy
+                    example: checkout-api
+                incidentId:
+                    type: string
+                    examples:
+                        - "412"
+                    format: int64
+                    example: "412"
+                image:
+                    type: string
+                    examples:
+                        - registry.example.com/checkout-api:1.42.0
+                    example: registry.example.com/checkout-api:1.42.0
+                imageId:
+                    type: string
+                    examples:
+                        - registry.example.com/checkout-api@sha256:9f2e5c0a1b7d4e6f8a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f
+                    example: registry.example.com/checkout-api@sha256:9f2e5c0a1b7d4e6f8a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f
+                containerId:
+                    type: string
+                    examples:
+                        - containerd://5b1a9c0d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b
+                    example: containerd://5b1a9c0d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b
+                state:
+                    type: string
+                    enum:
+                        - CONTAINER_STATE_UNSPECIFIED
+                        - waiting
+                        - running
+                        - terminated
+                    description: ContainerState is a container's lifecycle state.
+                reason:
+                    type: string
+                    examples:
+                        - Error
+                        - OOMKilled
+                        - CrashLoopBackOff
+                    example: Error
+                exitCode:
+                    type: integer
+                    examples:
+                        - 137
+                        - 1
+                    format: int32
+                    example: 137
+                signal:
+                    type: integer
+                    examples:
+                        - 9
+                    format: int32
+                    example: 9
+                restartCount:
+                    type: integer
+                    examples:
+                        - 7
+                        - 0
+                    format: int32
+                    example: 7
+                category:
+                    type: string
+                    enum:
+                        - CATEGORY_UNSPECIFIED
+                        - oom
+                        - crash
+                        - image_pull
+                        - config
+                        - probe
+                        - scheduling
+                        - node_pressure
+                        - rescheduled
+                        - job_failed
+                        - other
+                        - stuck
+                        - unclean_exit
+                    description: Category classifies what kind of incident was observed.
+                k8sStartedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:04.000000Z"
+                    example: "2026-08-27T14:03:04.000000Z"
+                k8sFinishedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:11.000000Z"
+                    example: "2026-08-27T14:03:11.000000Z"
+                observedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:03:11.482913Z"
+                    example: "2026-08-27T14:03:11.482913Z"
+                gapReconstructed:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    description: |-
+                        True when the row was inferred from a restart_count jump rather than
+                         seen; the application draws it hollow.
+                    example: false
+            description: |-
+                ContainerStateHistory is a row of the container_state_history table: one
+                 observed container transition.
+        GetArtifactRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+            description: GetArtifactRequest addresses one artifacts row.
+        ListWorkloadsRequest:
+            type: object
+            properties:
+                clusterIds:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+                namespace:
+                    type: string
+                limit:
+                    type: integer
+                    format: int32
+                    description: Zero means the daemon's configured default.
+            description: ListWorkloadsRequest scopes and filters the workload list.
+        WorkloadsResponse:
+            type: object
+            properties:
+                workloads:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/WorkloadRow'
+                truncated:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    example: false
+            description: WorkloadsResponse is the workload list.
+        WorkloadRow:
+            type: object
+            properties:
+                clusterId:
+                    type: string
+                    examples:
+                        - "1"
+                        - "2"
+                    format: int64
+                    example: "1"
+                namespace:
+                    type: string
+                    examples:
+                        - shop
+                        - payments
+                    example: shop
+                workloadKind:
+                    type: string
+                    examples:
+                        - Deployment
+                        - Job
+                        - StatefulSet
+                    example: Deployment
+                workloadName:
+                    type: string
+                    examples:
+                        - checkout-api
+                    example: checkout-api
+                incidentsByCategory:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CategoryCount'
+                openIncidents:
+                    type: integer
+                    examples:
+                        - 1
+                        - 0
+                        - 3
+                    format: int32
+                    example: 1
+                occurrences:
+                    type: integer
+                    examples:
+                        - 23
+                        - 7
+                    format: int32
+                    example: 23
+                imageTags:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/TagCount'
+                livePods:
+                    type: integer
+                    examples:
+                        - 2
+                        - 0
+                    format: int32
+                    example: 2
+                deletedPods:
+                    type: integer
+                    examples:
+                        - 4
+                        - 0
+                    format: int32
+                    example: 4
+                podUid:
+                    type: string
+                    examples:
+                        - 3c1d0b2a-77aa-4f31-9b02-5d6e7f801122
+                    description: 'Set only for kind "none": the controller-less pod this row is.'
+                    example: 3c1d0b2a-77aa-4f31-9b02-5d6e7f801122
+                podName:
+                    type: string
+                    examples:
+                        - debug-shell
+                    description: Set only for kind "none".
+                    example: debug-shell
+            description: |-
+                WorkloadRow is one row of the workload tree: everything seen for one
+                 (cluster_id, namespace, workload_kind, workload_name). A pod no controller
+                 owns is one row per pod instead, keyed on pod_uid.
+        TagCount:
+            type: object
+            properties:
+                tag:
+                    type: string
+                    examples:
+                        - 1.42.0
+                        - 1.41.3
+                        - ""
+                    example: 1.42.0
+                count:
+                    type: integer
+                    examples:
+                        - 6
+                        - 2
+                        - 1
+                    format: int32
+                    example: 6
+            description: TagCount is one image tag and how many times it was seen.
+        GetWorkloadRequest:
+            type: object
+            properties:
+                clusterId:
+                    type: string
+                    format: int64
+                namespace:
+                    type: string
+                kind:
+                    type: string
+                name:
+                    type: string
+                podsLive:
+                    type: string
+                    description: '"true" for live pods, "false" for deleted ones, absent for both.'
+                podsLimit:
+                    type: integer
+                    format: int32
+                    description: Zero means the daemon's configured default.
+            description: GetWorkloadRequest addresses one workload by its identity.
+        WorkloadDetail:
+            type: object
+            properties:
+                workload:
+                    $ref: '#/components/schemas/WorkloadRow'
+                rollouts:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Rollout'
+                restartsByHour:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/HourBucket'
+                pods:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/PodRow'
+                podsTruncated:
+                    type: boolean
+                    description: Set when pods_limit cut off more pods than it returned.
+                runs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/JobRow'
+            description: WorkloadDetail is everything the workload page shows.
+        Rollout:
+            type: object
+            properties:
+                replicasetUid:
+                    type: string
+                    examples:
+                        - 3c1d0b2a-77aa-4f31-9b02-5d6e7f801122
+                    example: 3c1d0b2a-77aa-4f31-9b02-5d6e7f801122
+                replicasetName:
+                    type: string
+                    examples:
+                        - checkout-api-7d9f8b6c4
+                    example: checkout-api-7d9f8b6c4
+                revision:
+                    type: string
+                    examples:
+                        - "8"
+                        - "7"
+                    format: int64
+                    example: "8"
+                images:
+                    type: array
+                    items:
+                        type: string
+                        examples:
+                            - registry.example.com/checkout-api:1.42.0
+                        description: One image per container, in container_name order.
+                        example: registry.example.com/checkout-api:1.42.0
+                firstSeenAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:02:58.331004Z"
+                    example: "2026-08-27T14:02:58.331004Z"
+                lastSeenAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:09:41.115204Z"
+                    example: "2026-08-27T14:09:41.115204Z"
+                deletedAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:11:02.660713Z"
+                    example: "2026-08-27T14:11:02.660713Z"
+                incidents:
+                    type: integer
+                    examples:
+                        - 3
+                        - 0
+                    format: int32
+                    example: 3
+                createdAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:02:51.000000Z"
+                    description: 'The ReplicaSet''s own creationTimestamp: when the revision shipped.'
+                    example: "2026-08-27T14:02:51.000000Z"
+                replicas:
+                    type: integer
+                    examples:
+                        - 3
+                        - 0
+                    format: int32
+                    description: Absent when spec.replicas is unset on the object.
+                    example: 3
+                readyReplicas:
+                    type: integer
+                    examples:
+                        - 3
+                        - 0
+                    format: int32
+                    description: Absent until the ReplicaSet controller has observed the object.
+                    example: 3
+                availableReplicas:
+                    type: integer
+                    examples:
+                        - 3
+                        - 0
+                    format: int32
+                    example: 3
+            description: Rollout is one ReplicaSet of a Deployment.
+        HourBucket:
+            type: object
+            properties:
+                hour:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:00:00.000000Z"
+                    example: "2026-08-27T14:00:00.000000Z"
+                restarts:
+                    type: integer
+                    examples:
+                        - 7
+                        - 0
+                    format: int32
+                    example: 7
+                reconstructed:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    description: True when any transition in the hour was inferred rather than seen.
+                    example: false
+            description: |-
+                HourBucket counts the terminated transitions of a workload's pods in one
+                 hour of the retention window.
+        ListJobsRequest:
+            type: object
+            properties:
+                clusterIds:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+                namespace:
+                    type: string
+                cronjobUid:
+                    type: string
+                limit:
+                    type: integer
+                    format: int32
+                    description: Zero means the daemon's configured default.
+                cronjobName:
+                    type: string
+                live:
+                    type: string
+                    description: |-
+                        "true" for runs still in the cluster, "false" for deleted ones, absent
+                         for both.
+                failed:
+                    type: string
+                    description: '"true" for runs whose condition is Failed, absent for every run.'
+                jobUid:
+                    type: string
+                    description: |-
+                        job_uid names one run exactly; a run page is keyed by it and no
+                         other filter can reach a Job whose incidents were all swept.
+            description: ListJobsRequest scopes and filters the job list.
+        JobsResponse:
+            type: object
+            properties:
+                jobs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/JobRow'
+                truncated:
+                    type: boolean
+                    examples:
+                        - false
+                        - true
+                    example: false
+                total:
+                    type: integer
+                    examples:
+                        - 22
+                        - 0
+                    format: int32
+                    description: |-
+                        Counted over the filter that selected the page, live and failed excepted,
+                         so a truncated page says how many runs it stands for.
+                    example: 22
+                failedTotal:
+                    type: integer
+                    examples:
+                        - 3
+                        - 0
+                    format: int32
+                    example: 3
+            description: JobsResponse is the job list.
+        GetStatusRequest:
+            type: object
+            description: GetStatusRequest takes no parameters.
+        Status:
+            type: object
+            properties:
+                daemonRunning:
+                    type: boolean
+                    examples:
+                        - true
+                        - false
+                    description: |-
+                        False without a running daemon behind the listener, which is the case
+                         for the mock server.
+                    example: true
+                writtenAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:09:41.115204Z"
+                    example: "2026-08-27T14:09:41.115204Z"
+                pid:
+                    type: integer
+                    examples:
+                        - 48213
+                    format: int32
+                    example: 48213
+                version:
+                    type: string
+                    examples:
+                        - 0.0.1-dev
+                    example: 0.0.1-dev
+                clusters:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/StatusCluster'
+                writer:
+                    $ref: '#/components/schemas/WriterStats'
+                handlers:
+                    $ref: '#/components/schemas/HandlerStats'
+                capture:
+                    $ref: '#/components/schemas/CaptureStats'
+                closer:
+                    $ref: '#/components/schemas/CloserStats'
+                openByCategory:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CategoryCount'
+                closedByReason:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CloseReasonCount'
+                artifactsByOutcome:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/OutcomeCount'
+                rowCounts:
+                    $ref: '#/components/schemas/RowCounts'
+                latestSweepRuns:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/SweepRun'
+                dbBytes:
+                    type: string
+                    examples:
+                        - "1052672"
+                    format: int64
+                    example: "1052672"
+                walBytes:
+                    type: string
+                    examples:
+                        - "4136960"
+                        - "0"
+                    format: int64
+                    example: "4136960"
+                artifactFiles:
+                    type: integer
+                    examples:
+                        - 14
+                        - 0
+                    format: int32
+                    example: 14
+                artifactBytes:
+                    type: string
+                    examples:
+                        - "258048"
+                        - "0"
+                    format: int64
+                    example: "258048"
+                retentionDays:
+                    type: integer
+                    examples:
+                        - 3
+                    format: int32
+                    example: 3
+                sweepIntervalSeconds:
+                    type: integer
+                    examples:
+                        - 3600
+                    format: int32
+                    example: 3600
+                stabilizationWindowSeconds:
+                    type: integer
+                    examples:
+                        - 600
+                    format: int32
+                    example: 600
+                stabilizationCheckIntervalSeconds:
+                    type: integer
+                    examples:
+                        - 30
+                    format: int32
+                    example: 30
+                earlyCaptureDebounceSeconds:
+                    type: integer
+                    examples:
+                        - 60
+                    format: int32
+                    example: 60
+                apiStreamThrottleSeconds:
+                    type: integer
+                    examples:
+                        - 1
+                    format: int32
+                    example: 1
+                schedulingGraceSeconds:
+                    type: integer
+                    examples:
+                        - 60
+                    format: int32
+                    example: 60
+                stuckAfterSeconds:
+                    type: integer
+                    examples:
+                        - 600
+                    format: int32
+                    example: 600
+                probeGraceSeconds:
+                    type: integer
+                    examples:
+                        - 60
+                    format: int32
+                    example: 60
+                attentionWindowSeconds:
+                    type: integer
+                    examples:
+                        - 86400
+                    format: int32
+                    example: 86400
+            description: |-
+                Status is what idios status prints: the running process's snapshot merged
+                 with the database aggregates and the settings in force.
+        StatusCluster:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "1"
+                        - "2"
+                    format: int64
+                    example: "1"
+                ready:
+                    type: boolean
+                    examples:
+                        - true
+                        - false
+                    example: true
+                lastEventAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:09:41.115204Z"
+                    example: "2026-08-27T14:09:41.115204Z"
+                skewSeconds:
+                    type: number
+                    examples:
+                        - 0.184
+                        - -1.2
+                    format: double
+                    example: 0.184
+            description: StatusCluster is one watcher's runtime state.
+        WriterStats:
+            type: object
+            properties:
+                transactions:
+                    type: integer
+                    examples:
+                        - 1842
+                        - 0
+                    format: int32
+                    example: 1842
+                errors:
+                    type: integer
+                    examples:
+                        - 0
+                        - 2
+                    format: int32
+                    example: 0
+                p99Ms:
+                    type: number
+                    examples:
+                        - 3.4
+                        - 0
+                    format: double
+                    example: 3.4
+            description: WriterStats is the single writer's transaction counters.
+        HandlerStats:
+            type: object
+            properties:
+                errors:
+                    type: integer
+                    examples:
+                        - 0
+                        - 5
+                    format: int32
+                    example: 0
+                panics:
+                    type: integer
+                    examples:
+                        - 0
+                    format: int32
+                    example: 0
+            description: HandlerStats counts what went wrong at the informer handler boundary.
+        CaptureStats:
+            type: object
+            properties:
+                queued:
+                    type: integer
+                    examples:
+                        - 0
+                        - 3
+                    format: int32
+                    example: 0
+                completed:
+                    type: integer
+                    examples:
+                        - 14
+                        - 0
+                    format: int32
+                    example: 14
+                dropped:
+                    type: integer
+                    examples:
+                        - 0
+                        - 1
+                    format: int32
+                    example: 0
+                gaps:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GapCount'
+            description: CaptureStats is the capture pool's counters.
+        GapCount:
+            type: object
+            properties:
+                gap:
+                    type: string
+                    enum:
+                        - CAPTURE_GAP_UNSPECIFIED
+                        - pod_deleted
+                        - no_previous_run
+                        - forbidden
+                        - no_output
+                        - kubelet_error
+                        - unknown
+                        - unobservable
+                    description: CaptureGap explains why an artifact holds no file.
+                count:
+                    type: integer
+                    examples:
+                        - 2
+                        - 1
+                    format: int32
+                    example: 2
+            description: GapCount is one capture gap reason and how many captures ended in it.
+        CloserStats:
+            type: object
+            properties:
+                lastTickAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:09:30.000000Z"
+                    example: "2026-08-27T14:09:30.000000Z"
+                closed:
+                    type: integer
+                    examples:
+                        - 1
+                        - 0
+                    format: int32
+                    description: closed counts the last tick alone.
+                    example: 1
+                attached:
+                    type: integer
+                    examples:
+                        - 0
+                        - 2
+                    format: int32
+                    description: attached counts the last tick alone.
+                    example: 0
+                closedTotal:
+                    type: integer
+                    examples:
+                        - 14
+                        - 0
+                    format: int32
+                    example: 14
+                attachedTotal:
+                    type: integer
+                    examples:
+                        - 6
+                        - 0
+                    format: int32
+                    example: 6
+                opened:
+                    type: integer
+                    examples:
+                        - 1
+                        - 0
+                    format: int32
+                    description: opened counts the last tick alone.
+                    example: 1
+                openedTotal:
+                    type: integer
+                    examples:
+                        - 3
+                        - 0
+                    format: int32
+                    example: 3
+            description: CloserStats is the last successful closer tick and the totals behind it.
+        CloseReasonCount:
+            type: object
+            properties:
+                closeReason:
+                    type: string
+                    enum:
+                        - CLOSE_REASON_UNSPECIFIED
+                        - recovered
+                        - pod_deleted
+                        - job_finished
+                        - manual
+                    description: CloseReason records why an incident was closed.
+                count:
+                    type: integer
+                    examples:
+                        - 3
+                        - 1
+                    format: int32
+                    example: 3
+            description: CloseReasonCount is one close reason and how many closed incidents hold it.
+        OutcomeCount:
+            type: object
+            properties:
+                outcome:
+                    type: string
+                    examples:
+                        - file
+                        - no_previous_run
+                        - pod_deleted
+                    example: file
+                count:
+                    type: integer
+                    examples:
+                        - 12
+                        - 2
+                    format: int32
+                    example: 12
+            description: |-
+                OutcomeCount is one capture outcome and how many artifact rows hold it.
+                 The outcome is a capture gap reason, or "file" for rows that captured one.
+        RowCounts:
+            type: object
+            properties:
+                pods:
+                    type: integer
+                    examples:
+                        - 46
+                        - 0
+                    format: int32
+                    example: 46
+                livePods:
+                    type: integer
+                    examples:
+                        - 12
+                        - 0
+                    format: int32
+                    example: 12
+                transitions:
+                    type: integer
+                    examples:
+                        - 318
+                        - 0
+                    format: int32
+                    example: 318
+                events:
+                    type: integer
+                    examples:
+                        - 1204
+                        - 0
+                    format: int32
+                    example: 1204
+            description: RowCounts sizes the observation tables.
+        SweepRun:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "31"
+                        - "32"
+                    format: int64
+                    example: "31"
+                ranAt:
+                    type: string
+                    examples:
+                        - "2026-08-27T14:00:00.114882Z"
+                    example: "2026-08-27T14:00:00.114882Z"
+                cutoff:
+                    type: string
+                    examples:
+                        - "2026-08-24T14:00:00.114882Z"
+                    example: "2026-08-24T14:00:00.114882Z"
+                tableName:
+                    type: string
+                    examples:
+                        - k8s_events
+                        - container_state_history
+                        - pods
+                    example: k8s_events
+                rowsRemoved:
+                    type: integer
+                    examples:
+                        - 104
+                        - 0
+                    format: int32
+                    example: 104
+                filesRemoved:
+                    type: integer
+                    examples:
+                        - 3
+                        - 0
+                    format: int32
+                    example: 3
+                bytesRemoved:
+                    type: string
+                    examples:
+                        - "55296"
+                        - "0"
+                    format: int64
+                    example: "55296"
+                durationMs:
+                    type: integer
+                    examples:
+                        - 7
+                        - 112
+                    format: int32
+                    example: 7
+                error:
+                    type: string
+                    examples:
+                        - disk I/O error
+                    example: disk I/O error
+            description: SweepRun is a row of the sweep_runs table.
+        AcknowledgeIncidentRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "412"
+                        - "413"
+                    format: int64
+                    example: "412"
+            description: AcknowledgeIncidentRequest addresses the incident to acknowledge.
+        UnacknowledgeIncidentRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "412"
+                        - "413"
+                    format: int64
+                    example: "412"
+            description: |-
+                UnacknowledgeIncidentRequest addresses the incident to clear the
+                 acknowledgement of.
+        ResolveIncidentRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "412"
+                        - "413"
+                    format: int64
+                    example: "412"
+            description: ResolveIncidentRequest addresses the incident to close as manual.
+        UnresolveIncidentRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "412"
+                        - "413"
+                    format: int64
+                    example: "412"
+            description: |-
+                UnresolveIncidentRequest addresses the incident to reopen a manual close
+                 of.
+        DismissIncidentRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "412"
+                        - "413"
+                    format: int64
+                    example: "412"
+            description: DismissIncidentRequest addresses the incident to dismiss.
+        UndismissIncidentRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "412"
+                        - "413"
+                    format: int64
+                    example: "412"
+            description: UndismissIncidentRequest addresses the incident to clear the dismissal of.
+        SetIncidentNoteRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "412"
+                        - "413"
+                    format: int64
+                    example: "412"
+                note:
+                    type: string
+                    examples:
+                        - waiting on the 1.42.1 image
+                    example: waiting on the 1.42.1 image
+            description: SetIncidentNoteRequest carries the whole note; an empty note clears it.
+        DeleteIncidentRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "412"
+                        - "413"
+                    format: int64
+                    example: "412"
+            description: DeleteIncidentRequest addresses the incident to delete.
+        DeleteIncidentResponse:
+            type: object
+            description: |-
+                DeleteIncidentResponse is empty: the row is gone, there is nothing to
+                 return.
+        AddClusterRequest:
+            type: object
+            properties:
+                contextName:
+                    type: string
+                    examples:
+                        - orbstack
+                        - prod-eu
+                    example: orbstack
+                name:
+                    type: string
+                    examples:
+                        - prod
+                        - staging
+                    example: prod
+            description: |-
+                AddClusterRequest names a kubeconfig context and the friendly name the
+                 application shows for it.
+        RenameClusterRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "1"
+                        - "2"
+                    format: int64
+                    example: "1"
+                name:
+                    type: string
+                    examples:
+                        - prod
+                        - staging
+                    example: prod
+            description: RenameClusterRequest addresses a cluster and its new friendly name.
+        SetClusterGrafanaRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "1"
+                        - "2"
+                    format: int64
+                    example: "1"
+                grafanaUrl:
+                    type: string
+                    examples:
+                        - https://logs.example.grafana.net
+                    example: https://logs.example.grafana.net
+                lokiDatasourceUid:
+                    type: string
+                    examples:
+                        - grafanacloud-logs
+                    example: grafanacloud-logs
+                logSelector:
+                    type: string
+                    examples:
+                        - '{namespace="$namespace", pod="$pod", container="$container"}'
+                    example: '{namespace="$namespace", pod="$pod", container="$container"}'
+            description: |-
+                SetClusterGrafanaRequest addresses a cluster and its Grafana log-link
+                 configuration; an empty grafana_url clears all three fields.
+        DeleteClusterRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "1"
+                        - "2"
+                    format: int64
+                    example: "1"
+            description: DeleteClusterRequest addresses the cluster to remove.
+        DeleteClusterResponse:
+            type: object
+            description: |-
+                DeleteClusterResponse is empty: the row is gone, there is nothing to
+                 return.
+        AddWatchedNamespaceRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "1"
+                        - "2"
+                    format: int64
+                    example: "1"
+                name:
+                    type: string
+                    examples:
+                        - shop
+                        - payments
+                    example: shop
+            description: |-
+                AddWatchedNamespaceRequest addresses a cluster and the namespace to start
+                 watching.
+        RemoveWatchedNamespaceRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    examples:
+                        - "1"
+                        - "2"
+                    format: int64
+                    example: "1"
+                name:
+                    type: string
+                    examples:
+                        - shop
+                        - payments
+                    example: shop
+            description: |-
+                RemoveWatchedNamespaceRequest addresses a cluster and the namespace to
+                 stop watching.

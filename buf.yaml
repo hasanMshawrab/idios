@@ -1,0 +1,12 @@
+version: v2
+modules:
+  - path: api/proto
+deps:
+  - buf.build/sebmelki/sebuf
+lint:
+  use:
+    - STANDARD
+  except:
+    - RPC_RESPONSE_STANDARD_NAME
+  enum_zero_value_suffix: _UNSPECIFIED
+  service_suffix: Service

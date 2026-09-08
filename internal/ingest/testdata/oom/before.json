@@ -1,0 +1,4 @@
+{"metadata":{"name":"mem-hog-5f6d7-qwert","namespace":"idios-smoke","uid":"pod-oom","creationTimestamp":"2026-08-27T11:45:00Z","ownerReferences":[{"apiVersion":"apps/v1","kind":"ReplicaSet","name":"mem-hog-5f6d7","uid":"rs-memhog-1","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Always","containers":[{"name":"api","image":"registry.example.com/mem-hog:2.0.0","resources":{"limits":{"memory":"10Mi"},"requests":{"memory":"10Mi"}}}]},
+ "status":{"phase":"Running","qosClass":"Burstable","startTime":"2026-08-27T11:45:05Z",
+  "containerStatuses":[{"name":"api","image":"registry.example.com/mem-hog:2.0.0","imageID":"registry.example.com/mem-hog@sha256:2222","containerID":"containerd://mmm","ready":true,"restartCount":0,"state":{"running":{"startedAt":"2026-08-27T11:45:08Z"}}}]}}

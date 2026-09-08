@@ -1,0 +1,129 @@
+syntax = "proto3";
+
+package idios.v1;
+
+import "idios/v1/common.proto";
+import "sebuf/http/annotations.proto";
+
+option go_package = "github.com/hasanMshawrab/idios/internal/apigen/idiosv1;idiosv1";
+
+// StatusCluster is one watcher's runtime state.
+message StatusCluster {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["1", "2"]}];
+  bool ready = 2 [(sebuf.http.field_examples) = {values: ["true", "false"]}];
+  optional string last_event_at = 3 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:09:41.115204Z"]}];
+  double skew_seconds = 4 [(sebuf.http.field_examples) = {values: ["0.184", "-1.2"]}];
+}
+
+// WriterStats is the single writer's transaction counters.
+message WriterStats {
+  int32 transactions = 1 [(sebuf.http.field_examples) = {values: ["1842", "0"]}];
+  int32 errors = 2 [(sebuf.http.field_examples) = {values: ["0", "2"]}];
+  double p99_ms = 3 [(sebuf.http.field_examples) = {values: ["3.4", "0"]}];
+}
+
+// HandlerStats counts what went wrong at the informer handler boundary.
+message HandlerStats {
+  int32 errors = 1 [(sebuf.http.field_examples) = {values: ["0", "5"]}];
+  int32 panics = 2 [(sebuf.http.field_examples) = {values: ["0"]}];
+}
+
+// GapCount is one capture gap reason and how many captures ended in it.
+message GapCount {
+  CaptureGap gap = 1;
+  int32 count = 2 [(sebuf.http.field_examples) = {values: ["2", "1"]}];
+}
+
+// CaptureStats is the capture pool's counters.
+message CaptureStats {
+  int32 queued = 1 [(sebuf.http.field_examples) = {values: ["0", "3"]}];
+  int32 completed = 2 [(sebuf.http.field_examples) = {values: ["14", "0"]}];
+  int32 dropped = 3 [(sebuf.http.field_examples) = {values: ["0", "1"]}];
+  repeated GapCount gaps = 4;
+}
+
+// CloserStats is the last successful closer tick and the totals behind it.
+message CloserStats {
+  optional string last_tick_at = 1 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:09:30.000000Z"]}];
+  // closed counts the last tick alone.
+  int32 closed = 2 [(sebuf.http.field_examples) = {values: ["1", "0"]}];
+  // attached counts the last tick alone.
+  int32 attached = 3 [(sebuf.http.field_examples) = {values: ["0", "2"]}];
+  int32 closed_total = 4 [(sebuf.http.field_examples) = {values: ["14", "0"]}];
+  int32 attached_total = 5 [(sebuf.http.field_examples) = {values: ["6", "0"]}];
+  // opened counts the last tick alone.
+  int32 opened = 6 [(sebuf.http.field_examples) = {values: ["1", "0"]}];
+  int32 opened_total = 7 [(sebuf.http.field_examples) = {values: ["3", "0"]}];
+}
+
+// CloseReasonCount is one close reason and how many closed incidents hold it.
+message CloseReasonCount {
+  CloseReason close_reason = 1;
+  int32 count = 2 [(sebuf.http.field_examples) = {values: ["3", "1"]}];
+}
+
+// OutcomeCount is one capture outcome and how many artifact rows hold it.
+// The outcome is a capture gap reason, or "file" for rows that captured one.
+message OutcomeCount {
+  string outcome = 1 [(sebuf.http.field_examples) = {values: ["file", "no_previous_run", "pod_deleted"]}];
+  int32 count = 2 [(sebuf.http.field_examples) = {values: ["12", "2"]}];
+}
+
+// RowCounts sizes the observation tables.
+message RowCounts {
+  int32 pods = 1 [(sebuf.http.field_examples) = {values: ["46", "0"]}];
+  int32 live_pods = 2 [(sebuf.http.field_examples) = {values: ["12", "0"]}];
+  int32 transitions = 3 [(sebuf.http.field_examples) = {values: ["318", "0"]}];
+  int32 events = 4 [(sebuf.http.field_examples) = {values: ["1204", "0"]}];
+}
+
+// SweepRun is a row of the sweep_runs table.
+message SweepRun {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["31", "32"]}];
+  string ran_at = 2 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:00:00.114882Z"]}];
+  string cutoff = 3 [(sebuf.http.field_examples) = {values: ["2026-08-24T14:00:00.114882Z"]}];
+  string table_name = 4 [(sebuf.http.field_examples) = {values: ["k8s_events", "container_state_history", "pods"]}];
+  int32 rows_removed = 5 [(sebuf.http.field_examples) = {values: ["104", "0"]}];
+  int32 files_removed = 6 [(sebuf.http.field_examples) = {values: ["3", "0"]}];
+  int64 bytes_removed = 7 [(sebuf.http.field_examples) = {values: ["55296", "0"]}];
+  int32 duration_ms = 8 [(sebuf.http.field_examples) = {values: ["7", "112"]}];
+  optional string error = 9 [(sebuf.http.field_examples) = {values: ["disk I/O error"]}];
+}
+
+// GetStatusRequest takes no parameters.
+message GetStatusRequest {}
+
+// Status is what idios status prints: the running process's snapshot merged
+// with the database aggregates and the settings in force.
+message Status {
+  // False without a running daemon behind the listener, which is the case
+  // for the mock server.
+  bool daemon_running = 1 [(sebuf.http.field_examples) = {values: ["true", "false"]}];
+  string written_at = 2 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:09:41.115204Z"]}];
+  int32 pid = 3 [(sebuf.http.field_examples) = {values: ["48213"]}];
+  string version = 4 [(sebuf.http.field_examples) = {values: ["0.0.1-dev"]}];
+  repeated StatusCluster clusters = 5;
+  WriterStats writer = 6;
+  HandlerStats handlers = 7;
+  CaptureStats capture = 8;
+  CloserStats closer = 9;
+  repeated CategoryCount open_by_category = 10;
+  repeated CloseReasonCount closed_by_reason = 11;
+  repeated OutcomeCount artifacts_by_outcome = 12;
+  RowCounts row_counts = 13;
+  repeated SweepRun latest_sweep_runs = 14;
+  int64 db_bytes = 15 [(sebuf.http.field_examples) = {values: ["1052672"]}];
+  int64 wal_bytes = 16 [(sebuf.http.field_examples) = {values: ["4136960", "0"]}];
+  int32 artifact_files = 17 [(sebuf.http.field_examples) = {values: ["14", "0"]}];
+  int64 artifact_bytes = 18 [(sebuf.http.field_examples) = {values: ["258048", "0"]}];
+  int32 retention_days = 19 [(sebuf.http.field_examples) = {values: ["3"]}];
+  int32 sweep_interval_seconds = 20 [(sebuf.http.field_examples) = {values: ["3600"]}];
+  int32 stabilization_window_seconds = 21 [(sebuf.http.field_examples) = {values: ["600"]}];
+  int32 stabilization_check_interval_seconds = 22 [(sebuf.http.field_examples) = {values: ["30"]}];
+  int32 early_capture_debounce_seconds = 23 [(sebuf.http.field_examples) = {values: ["60"]}];
+  int32 api_stream_throttle_seconds = 24 [(sebuf.http.field_examples) = {values: ["1"]}];
+  int32 scheduling_grace_seconds = 25 [(sebuf.http.field_examples) = {values: ["60"]}];
+  int32 stuck_after_seconds = 26 [(sebuf.http.field_examples) = {values: ["600"]}];
+  int32 probe_grace_seconds = 27 [(sebuf.http.field_examples) = {values: ["60"]}];
+  int32 attention_window_seconds = 28 [(sebuf.http.field_examples) = {values: ["86400"]}];
+}

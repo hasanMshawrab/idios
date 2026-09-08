@@ -1,0 +1,1 @@
+{"category":"job_failed","clusterId":"2","firstReason":"BackoffLimitExceeded","id":"413","lastReason":"BackoffLimitExceeded","lastSeenAt":"2026-08-27T14:03:11.482913Z","namespace":"idios-smoke","occurrences":1,"openedAt":"2026-08-27T14:03:11.482913Z","state":"open","subjectKind":"job","workloadKind":"CronJob","workloadName":"report"}

@@ -1,0 +1,5 @@
+{"metadata":{"name":"web-9a8b7-init1","namespace":"idios-smoke","uid":"pod-init","creationTimestamp":"2026-08-27T11:45:00Z","ownerReferences":[{"apiVersion":"apps/v1","kind":"ReplicaSet","name":"web-9a8b7","uid":"rs-web-4","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Always","initContainers":[{"name":"init-db","image":"registry.example.com/migrate:3.1.0"}],"containers":[{"name":"api","image":"registry.example.com/web:1.4.2"}]},
+ "status":{"phase":"Pending","qosClass":"BestEffort","startTime":"2026-08-27T11:45:05Z",
+  "initContainerStatuses":[{"name":"init-db","image":"registry.example.com/migrate:3.1.0","imageID":"registry.example.com/migrate@sha256:5555","containerID":"containerd://iii0","ready":false,"restartCount":0,"state":{"terminated":{"exitCode":1,"reason":"Error","startedAt":"2026-08-27T11:45:08Z","finishedAt":"2026-08-27T11:45:20Z","containerID":"containerd://iii0"}}}],
+  "containerStatuses":[{"name":"api","image":"registry.example.com/web:1.4.2","imageID":"","ready":false,"restartCount":0,"state":{"waiting":{"reason":"PodInitializing"}}}]}}

@@ -1,0 +1,4 @@
+{"metadata":{"name":"web-66c9d-term2","namespace":"idios-smoke","uid":"pod-term-pull","creationTimestamp":"2026-08-27T11:45:00Z","deletionTimestamp":"2026-08-27T11:59:20Z","ownerReferences":[{"apiVersion":"apps/v1","kind":"ReplicaSet","name":"web-66c9d","uid":"rs-web-2","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Always","containers":[{"name":"api","image":"registry.example.com/web:does-not-exist"}]},
+ "status":{"phase":"Pending","qosClass":"BestEffort","startTime":"2026-08-27T11:45:05Z",
+  "containerStatuses":[{"name":"api","image":"registry.example.com/web:does-not-exist","imageID":"","ready":false,"restartCount":0,"state":{"waiting":{"reason":"ImagePullBackOff","message":"Back-off pulling image \"registry.example.com/web:does-not-exist\""}}}]}}

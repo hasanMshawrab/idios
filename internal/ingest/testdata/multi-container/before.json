@@ -1,0 +1,6 @@
+{"metadata":{"name":"web-4e5f6-multi","namespace":"idios-smoke","uid":"pod-multi","creationTimestamp":"2026-08-27T11:45:00Z","ownerReferences":[{"apiVersion":"apps/v1","kind":"ReplicaSet","name":"web-4e5f6","uid":"rs-web-6","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Always","containers":[{"name":"api","image":"registry.example.com/web:1.4.2"},{"name":"worker","image":"registry.example.com/worker:1.4.2"}]},
+ "status":{"phase":"Running","qosClass":"BestEffort","startTime":"2026-08-27T11:45:05Z",
+  "containerStatuses":[
+   {"name":"api","image":"registry.example.com/web:1.4.2","imageID":"registry.example.com/web@sha256:1111","containerID":"containerd://aaa4","ready":true,"restartCount":0,"state":{"running":{"startedAt":"2026-08-27T11:45:08Z"}}},
+   {"name":"worker","image":"registry.example.com/worker:1.4.2","imageID":"registry.example.com/worker@sha256:7777","containerID":"containerd://www","ready":true,"restartCount":0,"state":{"running":{"startedAt":"2026-08-27T11:45:09Z"}}}]}}

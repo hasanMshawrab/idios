@@ -1,0 +1,16 @@
+#!/bin/sh
+# Installed into .git/hooks/pre-commit by "make hooks".
+set -e
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$staged" ] && exit 0
+
+if ! printf '%s\n' "$staged" | grep -v '^internal/apigen/' | tr '\n' '\0' | xargs -0 hack/ascii-check; then
+    echo "pre-commit: non-ASCII in staged files (see .ai/ascii-only.md)" >&2
+    exit 1
+fi
+
+if [ -f go.mod ] && printf '%s\n' "$staged" | grep -qE '\.go$|^go\.(mod|sum)$'; then
+    go vet ./...
+    go build ./...
+fi

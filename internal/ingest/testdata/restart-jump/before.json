@@ -1,0 +1,6 @@
+{"metadata":{"name":"web-7d9f8c6b5-jump1","namespace":"idios-smoke","uid":"pod-jump","creationTimestamp":"2026-08-27T11:45:00Z","ownerReferences":[{"apiVersion":"apps/v1","kind":"ReplicaSet","name":"web-7d9f8c6b5","uid":"rs-web-1","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Always","containers":[{"name":"api","image":"registry.example.com/web:1.4.2"}]},
+ "status":{"phase":"Running","qosClass":"BestEffort","startTime":"2026-08-27T11:45:05Z",
+  "containerStatuses":[{"name":"api","image":"registry.example.com/web:1.4.2","imageID":"registry.example.com/web@sha256:1111","containerID":"containerd://j1","ready":false,"restartCount":1,
+   "state":{"waiting":{"reason":"CrashLoopBackOff"}},
+   "lastState":{"terminated":{"exitCode":1,"reason":"Error","startedAt":"2026-08-27T11:39:00Z","finishedAt":"2026-08-27T11:40:00Z","containerID":"containerd://j1"}}}]}}

@@ -1,0 +1,5 @@
+{"metadata":{"name":"web-7d9f8c6b5-press","namespace":"idios-smoke","uid":"pod-press","creationTimestamp":"2026-08-27T11:45:00Z","ownerReferences":[{"apiVersion":"apps/v1","kind":"ReplicaSet","name":"web-7d9f8c6b5","uid":"rs-web-1","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Always","containers":[{"name":"api","image":"registry.example.com/web:1.4.2"}]},
+ "status":{"phase":"Failed","reason":"Evicted","message":"The node was low on resource: memory.","qosClass":"BestEffort","startTime":"2026-08-27T11:45:05Z",
+  "conditions":[{"type":"DisruptionTarget","status":"True","reason":"TerminationByKubelet","message":"The node was low on resource: memory.","lastTransitionTime":"2026-08-27T11:59:40Z"},{"type":"Ready","status":"True","lastTransitionTime":"2026-08-27T11:45:10Z"}],
+  "containerStatuses":[{"name":"api","image":"registry.example.com/web:1.4.2","imageID":"registry.example.com/web@sha256:1111","containerID":"containerd://kkk","ready":true,"restartCount":0,"state":{"running":{"startedAt":"2026-08-27T11:45:08Z"}}}]}}

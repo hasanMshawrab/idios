@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package idios.v1;
+
+import "idios/v1/common.proto";
+import "sebuf/http/annotations.proto";
+
+option go_package = "github.com/hasanMshawrab/idios/internal/apigen/idiosv1;idiosv1";
+
+// Artifact is a row of the artifacts table: one captured file, or the
+// record of why there is none.
+message Artifact {
+  int64 id = 1 [(sebuf.http.field_examples) = {values: ["12", "13"]}];
+  string pod_uid = 2 [(sebuf.http.field_examples) = {values: ["8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70"]}];
+  optional int64 incident_id = 3 [(sebuf.http.field_examples) = {values: ["412"]}];
+  string container_name = 4 [(sebuf.http.field_examples) = {values: ["checkout-api", "envoy"]}];
+  ArtifactKind kind = 5;
+  int32 restart_count = 6 [(sebuf.http.field_examples) = {values: ["6", "-1"]}];
+  optional string file_path = 7 [(sebuf.http.field_examples) = {values: ["1/shop/checkout-api-7d9f8b6c4-x2kqp/checkout-api.6.previous.log"]}];
+  int64 size_bytes = 8 [(sebuf.http.field_examples) = {values: ["18432", "262144"]}];
+  bool truncated = 9 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+  bool captured_early = 10 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+  optional CaptureGap capture_gap = 11;
+  optional string capture_note = 12 [(sebuf.http.field_examples) = {values: ["the pod was gone before the log could be read"]}];
+  string captured_at = 13 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:12.904551Z"]}];
+}
+
+// GetArtifactRequest addresses one artifacts row.
+message GetArtifactRequest {
+  int64 id = 1;
+}

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: smoke-bad-image
+  labels:
+    idios-smoke: "true"
+spec:
+  restartPolicy: Always
+  containers:
+  - name: app
+    image: busybox:this-tag-does-not-exist
+    command: ["sleep", "3600"]

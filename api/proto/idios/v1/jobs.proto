@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package idios.v1;
+
+import "sebuf/http/annotations.proto";
+
+option go_package = "github.com/hasanMshawrab/idios/internal/apigen/idiosv1;idiosv1";
+
+// JobRow is one row of the job list: the jobs columns and whether the job
+// finished successfully.
+message JobRow {
+  string uid = 1 [(sebuf.http.field_examples) = {values: ["6d3a1f80-9c2b-4e77-b1a5-0e9f8d7c6b5a"]}];
+  int64 cluster_id = 2 [(sebuf.http.field_examples) = {values: ["1", "2"]}];
+  string namespace = 3 [(sebuf.http.field_examples) = {values: ["shop", "payments"]}];
+  string name = 4 [(sebuf.http.field_examples) = {values: ["nightly-reindex-29283840"]}];
+  optional string cronjob_uid = 5 [(sebuf.http.field_examples) = {values: ["f0e1d2c3-b4a5-4968-8778-695a4b3c2d1e"]}];
+  optional string cronjob_name = 6 [(sebuf.http.field_examples) = {values: ["nightly-reindex"]}];
+  int32 active = 7 [(sebuf.http.field_examples) = {values: ["0", "1"]}];
+  int32 succeeded = 8 [(sebuf.http.field_examples) = {values: ["1", "0"]}];
+  int32 failed = 9 [(sebuf.http.field_examples) = {values: ["0", "3"]}];
+  optional int32 backoff_limit = 10 [(sebuf.http.field_examples) = {values: ["6", "0"]}];
+  optional int32 completions = 11 [(sebuf.http.field_examples) = {values: ["1"]}];
+  optional int32 parallelism = 12 [(sebuf.http.field_examples) = {values: ["1"]}];
+  string restart_policy = 13 [(sebuf.http.field_examples) = {values: ["Never", "OnFailure"]}];
+  optional string condition_type = 14 [(sebuf.http.field_examples) = {values: ["Complete", "Failed"]}];
+  optional string condition_reason = 15 [(sebuf.http.field_examples) = {values: ["BackoffLimitExceeded"]}];
+  optional string condition_message = 16 [(sebuf.http.field_examples) = {values: ["Job has reached the specified backoff limit"]}];
+  string created_at = 17 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:00:00.000000Z"]}];
+  optional string started_at = 18 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:00:02.000000Z"]}];
+  optional string finished_at = 19 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:04:37.000000Z"]}];
+  string first_seen_at = 20 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:00:03.117442Z"]}];
+  string last_seen_at = 21 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:04:38.902311Z"]}];
+  optional string deleted_at = 22 [(sebuf.http.field_examples) = {values: ["2026-08-27T15:00:00.412009Z"]}];
+  // condition_type is Complete. The succeeded counter counts pods, which is
+  // not the same fact, so it is never read for this.
+  bool complete = 23 [(sebuf.http.field_examples) = {values: ["true", "false"]}];
+  // The Job's own spec.activeDeadlineSeconds; a DeadlineExceeded failure is
+  // unreadable without the deadline it names.
+  optional int64 active_deadline_seconds = 24 [(sebuf.http.field_examples) = {values: ["900"]}];
+}
+
+// JobsResponse is the job list.
+message JobsResponse {
+  repeated JobRow jobs = 1;
+  bool truncated = 2 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+  // Counted over the filter that selected the page, live and failed excepted,
+  // so a truncated page says how many runs it stands for.
+  int32 total = 3 [(sebuf.http.field_examples) = {values: ["22", "0"]}];
+  int32 failed_total = 4 [(sebuf.http.field_examples) = {values: ["3", "0"]}];
+}
+
+// ListJobsRequest scopes and filters the job list.
+message ListJobsRequest {
+  repeated int64 cluster_ids = 1 [(sebuf.http.query) = {}];
+  string namespace = 2 [(sebuf.http.query) = {}];
+  string cronjob_uid = 3 [(sebuf.http.query) = {}];
+  // Zero means the daemon's configured default.
+  int32 limit = 4 [(sebuf.http.query) = {}];
+  string cronjob_name = 5 [(sebuf.http.query) = {}];
+  // "true" for runs still in the cluster, "false" for deleted ones, absent
+  // for both.
+  string live = 6 [(sebuf.http.query) = {}];
+  // "true" for runs whose condition is Failed, absent for every run.
+  string failed = 7 [(sebuf.http.query) = {}];
+  // job_uid names one run exactly; a run page is keyed by it and no
+  // other filter can reach a Job whose incidents were all swept.
+  string job_uid = 8 [(sebuf.http.query) = {}];
+}

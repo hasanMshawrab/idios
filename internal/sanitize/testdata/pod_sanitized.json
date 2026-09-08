@@ -1,0 +1,121 @@
+{
+  "apiVersion": "v1",
+  "kind": "Pod",
+  "metadata": {
+    "annotations": {
+      "deployment.kubernetes.io/revision": "7",
+      "kubectl.kubernetes.io/last-applied-configuration": "(redacted)"
+    },
+    "generation": 1,
+    "labels": {
+      "app": "checkout-api"
+    },
+    "name": "checkout-api-7d9f6c5b8-2xqzl",
+    "namespace": "shop",
+    "uid": "3f1c0a2e-6b44-4d1f-9a0e-1b2c3d4e5f60"
+  },
+  "spec": {
+    "containers": [
+      {
+        "env": [
+          {
+            "name": "DATABASE_URL",
+            "value": "(redacted)"
+          },
+          {
+            "name": "API_KEY",
+            "valueFrom": {
+              "secretKeyRef": {
+                "key": "key",
+                "name": "checkout-api-key"
+              }
+            }
+          },
+          {
+            "name": "POD_NAME",
+            "valueFrom": {
+              "fieldRef": {
+                "fieldPath": "metadata.name"
+              }
+            }
+          }
+        ],
+        "envFrom": [
+          {
+            "secretRef": {
+              "name": "checkout-secrets"
+            }
+          }
+        ],
+        "image": "registry.example.com/checkout:1.4.2",
+        "name": "api",
+        "resources": {
+          "limits": {
+            "memory": "512Mi"
+          }
+        }
+      },
+      {
+        "image": "envoyproxy/envoy:v1.31.0",
+        "name": "envoy"
+      }
+    ],
+    "ephemeralContainers": [
+      {
+        "env": [
+          {
+            "name": "SSH_PRIVATE_KEY",
+            "value": "(redacted)"
+          }
+        ],
+        "image": "busybox:1.36",
+        "name": "debugger"
+      }
+    ],
+    "imagePullSecrets": [
+      {
+        "name": "registry-creds"
+      }
+    ],
+    "initContainers": [
+      {
+        "command": [
+          "/bin/migrate"
+        ],
+        "env": [
+          {
+            "name": "MIGRATION_TOKEN",
+            "value": "(redacted)"
+          }
+        ],
+        "image": "registry.example.com/checkout:1.4.2",
+        "name": "migrate"
+      }
+    ],
+    "serviceAccountName": "checkout",
+    "volumes": [
+      {
+        "name": "creds",
+        "secret": {
+          "secretName": "checkout-secrets"
+        }
+      }
+    ]
+  },
+  "status": {
+    "containerStatuses": [
+      {
+        "lastState": {
+          "terminated": {
+            "exitCode": 137,
+            "reason": "OOMKilled"
+          }
+        },
+        "name": "api",
+        "ready": false,
+        "restartCount": 6
+      }
+    ],
+    "phase": "Running"
+  }
+}

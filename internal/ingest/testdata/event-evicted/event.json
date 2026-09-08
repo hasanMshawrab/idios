@@ -1,0 +1,5 @@
+{"metadata":{"name":"web-7d9f8c6b5-abcde.18a2b3c4d5e6f7e2","namespace":"idios-smoke","uid":"ev-evicted-1","creationTimestamp":"2026-08-27T11:59:55Z"},
+ "involvedObject":{"kind":"Pod","namespace":"idios-smoke","name":"web-7d9f8c6b5-abcde","uid":"pod-crash"},
+ "reason":"Evicted","message":"The node was low on resource: memory.","type":"Warning",
+ "firstTimestamp":"2026-08-27T11:59:55Z","lastTimestamp":"2026-08-27T11:59:55Z","count":1,
+ "source":{"component":"kubelet","host":"node-a"}}

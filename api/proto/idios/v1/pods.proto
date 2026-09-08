@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package idios.v1;
+
+import "idios/v1/artifacts.proto";
+import "idios/v1/common.proto";
+import "idios/v1/incidents.proto";
+import "sebuf/http/annotations.proto";
+
+option go_package = "github.com/hasanMshawrab/idios/internal/apigen/idiosv1;idiosv1";
+
+// PodRow is one row of the pod list: the pods columns and the counts the
+// list shows beside them.
+message PodRow {
+  string uid = 1 [(sebuf.http.field_examples) = {values: ["8f14e45f-ceea-467a-9a1e-2b3c4d5e6f70"]}];
+  int64 cluster_id = 2 [(sebuf.http.field_examples) = {values: ["1", "2"]}];
+  string namespace = 3 [(sebuf.http.field_examples) = {values: ["shop", "payments"]}];
+  string name = 4 [(sebuf.http.field_examples) = {values: ["checkout-api-7d9f8b6c4-x2kqp"]}];
+  optional string node_name = 5 [(sebuf.http.field_examples) = {values: ["orbstack"]}];
+  string phase = 6 [(sebuf.http.field_examples) = {values: ["Running", "Pending", "Failed"]}];
+  optional string status_reason = 7 [(sebuf.http.field_examples) = {values: ["Unschedulable"]}];
+  optional string status_message = 8 [(sebuf.http.field_examples) = {values: ["0/1 nodes are available: 1 Insufficient cpu."]}];
+  optional string deletion_requested_at = 9 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:07:52.104881Z"]}];
+  optional string qos_class = 10 [(sebuf.http.field_examples) = {values: ["Burstable", "Guaranteed"]}];
+  string controller_kind = 11 [(sebuf.http.field_examples) = {values: ["ReplicaSet", "Job"]}];
+  string controller_name = 12 [(sebuf.http.field_examples) = {values: ["checkout-api-7d9f8b6c4"]}];
+  string controller_uid = 13 [(sebuf.http.field_examples) = {values: ["3c1d0b2a-77aa-4f31-9b02-5d6e7f801122"]}];
+  string workload_kind = 14 [(sebuf.http.field_examples) = {values: ["Deployment", "Job", "StatefulSet"]}];
+  string workload_name = 15 [(sebuf.http.field_examples) = {values: ["checkout-api"]}];
+  string created_at = 16 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:02:58.000000Z"]}];
+  optional string started_at = 17 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:04.000000Z"]}];
+  string first_seen_at = 18 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:03:11.482913Z"]}];
+  string last_seen_at = 19 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:09:41.115204Z"]}];
+  optional string deleted_at = 20 [(sebuf.http.field_examples) = {values: ["2026-08-27T14:11:02.660713Z"]}];
+  optional DeletionSource deletion_source = 21;
+  optional DeletionReason deletion_reason = 22;
+  int32 open_incidents = 23 [(sebuf.http.field_examples) = {values: ["1", "0", "2"]}];
+  int32 container_count = 24 [(sebuf.http.field_examples) = {values: ["2", "1"]}];
+  // The worst state over the app and sidecar containers, for the status
+  // badge; unspecified when the pod has none.
+  ContainerState worst_state = 25;
+}
+
+// PodsResponse is the pod list.
+message PodsResponse {
+  repeated PodRow pods = 1;
+  bool truncated = 2 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+}
+
+// ListPodsRequest scopes and filters the pod list.
+message ListPodsRequest {
+  repeated int64 cluster_ids = 1 [(sebuf.http.query) = {}];
+  string namespace = 2 [(sebuf.http.query) = {}];
+  string workload_kind = 3 [(sebuf.http.query) = {}];
+  string workload_name = 4 [(sebuf.http.query) = {}];
+  // "true" for live pods, "false" for deleted ones, absent for both.
+  string live = 5 [(sebuf.http.query) = {}];
+  // Zero means the daemon's configured default.
+  int32 limit = 6 [(sebuf.http.query) = {}];
+  // pod_name is an exact match on name, so a client holding a name from a
+  // truncated list still reaches its row.
+  string pod_name = 7 [(sebuf.http.query) = {}];
+  // job_uid is the controller uid of the Job that owns the pod, so a run can
+  // list every attempt it made and not only the ones that failed.
+  string job_uid = 8 [(sebuf.http.query) = {}];
+}
+
+// GetPodRequest addresses one pods row.
+message GetPodRequest {
+  string uid = 1;
+}
+
+// PodDetail is everything the pod page shows.
+message PodDetail {
+  PodRow pod = 1;
+  repeated Container containers = 2;
+  // The latest condition per type.
+  repeated PodCondition conditions = 3;
+  repeated IncidentRow incidents = 4;
+  repeated Artifact artifacts = 5;
+  // The other pods of the same controller in this cluster, at most five,
+  // ordered as the pod page's rail shows them.
+  repeated SiblingPod siblings = 6;
+  // Every pod of the controller in this cluster, this one included.
+  int32 sibling_total = 7;
+}
+
+// PodEventsRequest addresses one pod's events.
+message PodEventsRequest {
+  string uid = 1;
+  // Zero means the daemon's configured default.
+  int32 limit = 2 [(sebuf.http.query) = {}];
+}
+
+// EventsResponse is a pod's events, newest first.
+message EventsResponse {
+  repeated K8sEvent events = 1;
+  bool truncated = 2 [(sebuf.http.field_examples) = {values: ["false", "true"]}];
+}
+
+// PodHistoryRequest addresses one pod's stored history.
+message PodHistoryRequest {
+  string uid = 1;
+}
+
+// HistoryResponse is a pod's container transitions and conditions, oldest
+// first.
+message HistoryResponse {
+  repeated ContainerStateHistory transitions = 1;
+  repeated PodCondition conditions = 2;
+}

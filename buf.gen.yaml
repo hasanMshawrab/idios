@@ -1,0 +1,21 @@
+version: v2
+plugins:
+  - local: protoc-gen-go
+    out: .
+    opt: module=github.com/hasanMshawrab/idios
+
+  # generate_mock is off: sebuf v0.23.2 emits a mock that assigns a string to
+  # every proto3 optional scalar, an int64 to every int32 and nothing to a
+  # repeated message, so the generated file does not compile.
+  - local: protoc-gen-go-http
+    out: .
+    opt:
+      - module=github.com/hasanMshawrab/idios
+      - generate_mock=false
+
+  - local: protoc-gen-go-client
+    out: .
+    opt: module=github.com/hasanMshawrab/idios
+
+  - local: protoc-gen-openapiv3
+    out: api/openapi

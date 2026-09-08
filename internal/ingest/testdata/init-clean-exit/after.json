@@ -1,0 +1,5 @@
+{"metadata":{"name":"web-3c4d5f6-clean1","namespace":"idios-smoke","uid":"pod-clean","creationTimestamp":"2026-08-27T11:45:00Z","ownerReferences":[{"apiVersion":"apps/v1","kind":"ReplicaSet","name":"web-3c4d5f6","uid":"rs-web-5","controller":true}]},
+ "spec":{"nodeName":"node-a","restartPolicy":"Always","initContainers":[{"name":"init-db","image":"registry.example.com/migrate:3.1.0"}],"containers":[{"name":"api","image":"registry.example.com/web:1.4.2"}]},
+ "status":{"phase":"Running","qosClass":"BestEffort","startTime":"2026-08-27T11:45:05Z",
+  "initContainerStatuses":[{"name":"init-db","image":"registry.example.com/migrate:3.1.0","imageID":"registry.example.com/migrate@sha256:5555","containerID":"containerd://iii1","ready":true,"restartCount":0,"state":{"terminated":{"exitCode":0,"reason":"Completed","startedAt":"2026-08-27T11:45:08Z","finishedAt":"2026-08-27T11:45:18Z","containerID":"containerd://iii1"}}}],
+  "containerStatuses":[{"name":"api","image":"registry.example.com/web:1.4.2","imageID":"registry.example.com/web@sha256:1111","containerID":"containerd://aaa1","ready":true,"restartCount":0,"state":{"running":{"startedAt":"2026-08-27T11:45:20Z"}}}]}}
